@@ -4,8 +4,9 @@
  *
  * Registered tools
  *   * `generate_course_notes`   — run the whole pipeline (or a subset of stages)
- *   * `check_notes_coverage`    — coverage + Markdown structure check
+ *   * `check_notes_coverage`    — coverage, multi-dimensional quality and Markdown structure
  *   * `probe_course_notes`      — environment/readiness diagnostics
+ *   * `read_course_notes_report`— read a previous run's artifacts
  *
  * Design notes that matter when extending this file:
  *   * `output.schema` is a *narrow* JSON Schema subset enforced by the tool
@@ -18,6 +19,10 @@
  *     tool validates its own arguments and throws an actionable message.
  *   * `ctx.tools.register()`'s disposer is owned by the tools service; it is
  *     adopted in this plugin's own effect so plugin unload removes the tools.
+ *   * **No tool here may fall back to `node:fs` when `ctx.fs` refuses a write.**
+ *     A native fallback turns a sandbox denial into a successful write, which is
+ *     exactly the bypass the Harness permission model exists to prevent.  See
+ *     `lib/files.js` and {@link relocateWorkspace}.
  */
 
 import path from 'node:path';
@@ -26,17 +31,27 @@ import { fileURLToPath } from 'node:url';
 import { DEFAULTS, mergeOptions, normalizeConfig } from './lib/config.js';
 import { createLogger, formatBytes, toPosix, truncate } from './lib/util.js';
 import { runPipeline, renderRunReport, PIPELINE_VERSION } from './lib/pipeline.js';
-import { createHarnessWorkspace, createNodeWorkspace } from './lib/files.js';
-import { checkCoverage, checkNoteStructure, loadNoteTexts, renderCoverageMarkdown, summariseCoverage } from './lib/coverage.js';
+import { createHarnessWorkspace, createNodeWorkspace, probeWritable, WRITE_PROBE_FILE } from './lib/files.js';
+import {
+  checkCoverage,
+  checkNoteStructure,
+  checkQuality,
+  loadNoteTexts,
+  renderCoverageMarkdown,
+  renderQualityMarkdown,
+  summariseCoverage,
+  summariseQuality,
+} from './lib/coverage.js';
 import { resolvePython, BACKEND_SCRIPT, pythonCapabilities, pythonDiscoveryReport } from './lib/python-bridge.js';
 import { scanInputs, describeScan } from './lib/scan.js';
+import { validateCitations } from './lib/evidence.js';
 
 export const name = 'course-notes';
 export const inject = ['tools'];
 export { DEFAULTS as defaultConfig };
 
 /** Build revision marker: bumped to force a fresh module generation on reload. */
-export const BUILD = '1.0.0+20261013d';
+export const BUILD = '1.1.0+20261014a';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 
@@ -135,33 +150,105 @@ function loggerFor(ctx, config) {
 /**
  * Pick the workspace implementation.
  *
- * `ctx.fs` is used when it is present so writes honour the session's sandbox
- * policy and appear in the workspace-change record.  When a Harness write is
- * denied (for example an output directory outside the writable roots), the
- * run is retried into the session workspace and the relocation is reported
- * instead of being hidden.
+ * `ctx.fs` is used whenever the seam is present, so every write is subject to the
+ * session's sandbox policy and appears in the workspace-change record.  The
+ * `node:fs` workspace exists for the offline CLI and for tests only — it is never
+ * selected as a *fallback* from a Harness run, because doing so would defeat the
+ * policy the seam enforces.
  */
-function workspaceFor(ctx, logger) {
+function workspaceFor(ctx, logger, options = {}) {
   const fsSeam = ctx.get?.('fs');
-  if (fsSeam && typeof fsSeam.writeText === 'function') {
-    return { workspace: createHarnessWorkspace({ fs: fsSeam }), kind: 'harness' };
+  if (fsSeam && typeof fsSeam.writeText === 'function' && typeof fsSeam.resolve === 'function') {
+    return {
+      workspace: createHarnessWorkspace(
+        { fs: fsSeam },
+        {
+          cwd: options.cwd,
+          maxBinaryBytes: options.maxBinaryBytes,
+        },
+      ),
+      kind: 'harness',
+    };
   }
-  logger?.debug('ctx.fs unavailable; falling back to node fs');
+  if (options.requireHarness) {
+    return { workspace: null, kind: 'unavailable' };
+  }
+  logger?.debug('ctx.fs unavailable; using the node workspace (CLI/test mode)');
   return { workspace: createNodeWorkspace(), kind: 'node' };
 }
 
-function resolveModel(deps, ctx, config) {
-  const selection = ctx.get?.('agentDefaultModel')?.currentSelection?.();
-  if (selection?.provider && selection?.model) return selection;
-  if (config.llmProvider && config.llmModel) {
-    return { provider: config.llmProvider, model: config.llmModel };
+/**
+ * Find a permitted output directory for a run whose requested directory the
+ * sandbox refused.
+ *
+ * v1.0 answered an `FS_SANDBOX_DENIED` by re-running the whole pipeline against a
+ * `node:fs` workspace, which wrote the files the sandbox had just refused.  Here
+ * the retry keeps the *same* `ctx.fs` seam and only changes the path, and it
+ * proves the candidate is writable with the same primitive the real write uses
+ * *before* committing to it.  If no candidate is permitted, nothing is written
+ * and the caller reports the denial.
+ *
+ * The proof leaves a one-byte marker behind (there is no delete primitive in the
+ * seam).  That is deliberate and is named so a reader of the output directory can
+ * tell what it is; it is also what makes the relocation auditable afterwards.
+ *
+ * @returns {Promise<{dir: string|null, marker: string|null, tried: object[]}>}
+ */
+async function findPermittedOutputDir(workspace, cwd, requested) {
+  const candidates = [
+    path.join(cwd, 'course-notes-output'),
+    path.join(cwd, '.coursenotes-output'),
+  ].filter((dir) => path.resolve(dir) !== path.resolve(requested ?? ''));
+  const tried = [];
+  for (const dir of candidates) {
+    const probe = await probeWritable(workspace, dir);
+    tried.push({ dir, ok: probe.ok, code: probe.code, message: probe.message });
+    if (probe.ok) return { dir, marker: path.join(dir, WRITE_PROBE_FILE), tried };
   }
-  void deps;
+  return { dir: null, marker: null, tried };
+}
+
+/**
+ * Decide which provider/model authors the notes.
+ *
+ * Precedence: the session's selected model first (that is what the user is
+ * already talking to), then an explicit `llmProvider` + `llmModel` pair from the
+ * plugin config or the environment.  Both halves of the explicit pair are
+ * required — a provider without a model is a configuration error, not a
+ * half-usable selection — and the result is validated again by
+ * `runAuthoringStage`, which reports why authoring was skipped.
+ */
+function resolveModel(ctx, config) {
+  const selection = ctx.get?.('agentDefaultModel')?.currentSelection?.();
+  if (selection?.provider && selection?.model) {
+    return { provider: selection.provider, model: selection.model, source: 'session' };
+  }
+  const provider = config.llmProvider || process.env.COURSE_NOTES_LLM_PROVIDER || '';
+  const model = config.llmModel || process.env.COURSE_NOTES_LLM_MODEL || '';
+  if (provider && model) return { provider, model, source: 'config' };
   return null;
 }
 
 function cwdFromExec(exec) {
   return exec?.agent?.session?.header?.cwd ?? process.cwd();
+}
+
+/**
+ * Is this error code a permission refusal?
+ *
+ * A refusal must be treated differently from every other failure: it is the one
+ * case where retrying into a different directory can succeed.  The codes come
+ * from two vocabularies — the Harness filesystem seam (`FS_SANDBOX_DENIED`) and
+ * the host operating system (`EACCES` / `EPERM` / `EROFS`) — so both are matched.
+ * They are never matched on message text.
+ */
+function isDenied(code) {
+  return (
+    code === 'FS_SANDBOX_DENIED' ||
+    code === 'EACCES' ||
+    code === 'EPERM' ||
+    code === 'EROFS'
+  );
 }
 
 function contextDeps(ctx, logger) {
@@ -224,11 +311,12 @@ function buildGenerateTool(ctx, config) {
     description: [
       'Generate structured bilingual (Chinese + English) Markdown study notes from course materials.',
       'Supports PDF, PPTX, DOCX, Markdown, plain text and images, given as files, folders or a mix.',
-      'Pipeline: file scan -> content parsing (text, headings, tables, formulas, figures) -> knowledge-point',
-      'extraction -> external retrieval via the Harness web service -> note generation -> coverage check.',
-      'Returns a note-writing brief: the caller (or the plugin\'s own LLM stage) fills the generated',
-      'skeletons where they carry a COURSENOTES:TODO marker. Nothing is fabricated: unreadable figures and',
-      'unavailable retrieval are reported explicitly in run-report.md.',
+      'Pipeline: scan -> parse -> knowledge points -> external retrieval with evidence mapping ->',
+      'chunked LLM authoring (verified per chunk, repaired locally) -> coverage/quality check -> files.',
+      'mode="auto" (default) authors every knowledge point with ctx.llm when a model is resolvable and falls',
+      'back to a scaffold with an explicit reason when it is not; mode="scaffold" builds structure, evidence',
+      'and a writing brief only. The result reports an explicit completion state (verified / notes_authored /',
+      'scaffold_created / partial / parsed / failed) — written files alone are never reported as success.',
     ].join(' '),
     parameters: {
       type: 'object',
@@ -255,6 +343,13 @@ function buildGenerateTool(ctx, config) {
           enum: ['concise', 'standard', 'comprehensive'],
           description: 'Explanation depth. Default: comprehensive.',
         },
+        mode: {
+          type: 'string',
+          enum: ['auto', 'scaffold'],
+          description:
+            'auto (default): build structure then author every knowledge point with ctx.llm. ' +
+            'scaffold: structure + retrieval evidence + writing brief only, leaving COURSENOTES:TODO markers.',
+        },
         enable_web_search: { type: 'boolean', description: 'Use the Harness web service for supplementary material.' },
         enable_ocr: {
           type: 'boolean',
@@ -263,7 +358,7 @@ function buildGenerateTool(ctx, config) {
         include_examples: { type: 'boolean', description: 'Include worked examples in the generated material.' },
         include_exercises: { type: 'boolean', description: 'Include self-assessment questions.' },
         split_by_chapter: { type: 'boolean', description: 'One Markdown file per chapter plus a README index.' },
-        coverage_check: { type: 'boolean', description: 'Run the knowledge-point coverage check.' },
+        coverage_check: { type: 'boolean', description: 'Run the coverage and quality check.' },
         file_order: {
           type: 'string',
           enum: ['natural', 'name', 'explicit', 'mtime'],
@@ -277,15 +372,31 @@ function buildGenerateTool(ctx, config) {
         stages: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Run only these stages: scan, parse, knowledge, retrieve, generate, check, output.',
+          description:
+            'Run only these stages: scan, parse, knowledge, retrieve, generate, check, output. ' +
+            'A stage that is not listed is genuinely not executed; stages whose inputs were not produced are not run either and are reported as skipped.',
         },
         max_searches: { type: 'integer', description: 'Maximum external search queries.' },
         max_fetches: { type: 'integer', description: 'Maximum pages fetched for detail.' },
         brief_char_budget: { type: 'integer', description: 'Budget of the returned note-writing brief, in characters.' },
+        chunk_chars: {
+          type: 'integer',
+          description:
+            'Character budget for one generation chunk. 0 (default) derives it from the model context window. ' +
+            'A chapter is split into as many chunks as this budget needs, so no knowledge point is dropped.',
+        },
+        max_points_per_chunk: {
+          type: 'integer',
+          description: 'Maximum knowledge points per generation chunk. Default: 12.',
+        },
+        llm_max_attempts: {
+          type: 'integer',
+          description: 'Attempts per LLM call before a chunk is reported as failed. Default: 3.',
+        },
         author_with_llm: {
           type: 'boolean',
           description:
-            'Also author chapter prose with the session model (ctx.llm). Off by default: the brief is usually cheaper and higher quality.',
+            'Deprecated alias for mode: true = auto, false = scaffold. Kept for compatibility.',
         },
       },
     },
@@ -296,6 +407,10 @@ function buildGenerateTool(ctx, config) {
         required: ['ok', 'summary', 'brief', 'artifacts'],
         properties: {
           ok: { type: 'boolean' },
+          completion: {
+            type: 'string',
+            enum: ['parsed', 'scaffold_created', 'notes_authored', 'verified', 'partial', 'failed'],
+          },
           summary: { type: 'string' },
           brief: { type: 'string' },
           artifacts: {
@@ -306,10 +421,13 @@ function buildGenerateTool(ctx, config) {
               outputDir: { type: 'string' },
               workDir: { type: 'string' },
               noteFiles: { type: 'array', items: { type: 'string' } },
+              writtenNoteFiles: { type: 'array', items: { type: 'string' } },
               knowledgeJson: { type: 'string' },
               coverageReport: { type: 'string' },
               runReport: { type: 'string' },
               parseReport: { type: 'string' },
+              evidence: { type: 'string' },
+              visionTasks: { type: 'string' },
             },
           },
         },
@@ -323,102 +441,156 @@ function buildGenerateTool(ctx, config) {
         throw new Error('"input_paths" must contain at least one file or folder path');
       }
       const options = mergeOptions(config, args ?? {});
-      options.outputDir = args?.output_dir !== undefined ? String(args.output_dir) : options.outputDir;
+      if (args?.output_dir !== undefined) options.outputDir = String(args.output_dir);
+      if (args?.author_with_llm !== undefined) {
+        options.mode = args.author_with_llm === true ? 'auto' : 'scaffold';
+      }
       const stages = normalizeStages(args?.stages);
       const cwd = cwdFromExec(exec);
       const logger = loggerFor(ctx, options);
-      const { workspace, kind } = workspaceFor(ctx, logger);
+      const { workspace, kind } = workspaceFor(ctx, logger, {
+        cwd,
+        maxBinaryBytes: options.maxHarnessAssetBytes,
+      });
 
-      const selection = resolveModel(null, ctx, options);
+      const selection = resolveModel(ctx, options);
+      const authoring = options.mode === 'auto';
       const deps = {
         ...contextDeps(ctx, logger),
-        model: args?.author_with_llm === true ? selection : null,
+        model: authoring ? selection : null,
         signal: exec?.signal,
       };
 
       logger.info('generate_course_notes started', {
         inputs: inputPaths.length,
         stages: stages ?? 'all',
+        mode: options.mode,
         workspace: kind,
       });
 
-      let report = await runPipeline({
-        inputPaths,
-        options: stages && !stageEnabled(stages, 'output')
-          ? options
-          : options,
-        cwd,
-        workspace,
-        deps,
-        runId: undefined,
-        logger,
-        authorWithLlm: args?.author_with_llm === true,
-        requestedStages: stages,
-      });
+      const runOnce = (dir, runWorkspace) =>
+        runPipeline({
+          inputPaths,
+          options: dir === options.outputDir ? options : { ...options, outputDir: dir },
+          cwd,
+          workspace: runWorkspace,
+          deps,
+          runId: undefined,
+          logger,
+          requestedStages: stages,
+        });
+
+      let report = await runOnce(options.outputDir, workspace);
       report.workspaceKind = kind;
 
-      // A denied Harness write (e.g. an output directory outside the writable
-      // roots) is retried inside the session workspace and reported, never
-      // silently swallowed.
-      const denied = report.errors.filter(
-        (error) => error.code === 'FS_SANDBOX_DENIED' || error.code === 'EACCES' || error.code === 'EPERM',
-      );
+      /*
+       * A refused write is retried into a directory the sandbox permits — with the
+       * same `ctx.fs` seam, never with `node:fs`.  The relocation is reported; when
+       * no permitted directory exists, the run stops with the denial visible
+       * instead of quietly writing somewhere the user did not ask for.
+       *
+       * The trigger is a *refused note write*, not `noteFiles.length === 0`: the
+       * note list describes what the run intended to produce, so it is non-empty
+       * even when every write was denied.  Guarding on it meant a fully denied run
+       * reported success with a note list that did not exist on disk.
+       */
+      const denied = report.errors.filter((error) => isDenied(error.code));
+      const refusedNotes = report.outputs?.refusedNoteFiles ?? [];
+      const writtenNotes = report.outputs?.writtenNoteFiles ?? [];
       let relocated = null;
-      if (denied.length > 0 && kind === 'harness') {
-        const fallbackDir = path.join(cwd, 'course-notes-output');
-        logger.warn('output directory denied; retrying inside the workspace', { fallbackDir });
-        const retryOptions = { ...options, outputDir: fallbackDir };
-        const retry = await runPipeline({
-          inputPaths,
-          options: retryOptions,
-          cwd,
-          workspace: createNodeWorkspace(),
-          deps,
-          logger,
-          authorWithLlm: args?.author_with_llm === true,
-        });
-        retry.workspaceKind = 'node';
-        retry.relocatedFrom = options.outputDir !== '' ? options.outputDir : undefined;
-        retry.warnings.unshift({
-          stage: 'output',
-          code: 'output-relocated',
-          message:
-            `原输出目录被沙箱拒绝写入（${denied[0].message}），已改写会话工作区内的 course-notes-output 目录。` +
-            '如需写入原目录，请在具备写权限的模式下重跑，或先扩展可写根。',
-        });
-        relocated = retry;
-        report = retry;
+      if (denied.length > 0 && refusedNotes.length > 0 && writtenNotes.length === 0) {
+        if (kind !== 'harness') {
+          report.errors.push({
+            stage: 'output',
+            code: 'OUTPUT_DIR_UNAVAILABLE',
+            message: `输出目录不可写（${denied[0].message}），且当前为 CLI/Node 模式，没有可用的沙箱内备选目录。`,
+          });
+        } else {
+          const candidate = await findPermittedOutputDir(workspace, cwd, options.outputDir);
+          if (!candidate.dir) {
+            report.errors.push({
+              stage: 'output',
+              code: 'OUTPUT_DIR_UNAVAILABLE',
+              message:
+                `原输出目录被沙箱拒绝（${denied[0].message}），且没有找到可写入的备选目录。` +
+                `已尝试：${candidate.tried.map((item) => `${item.dir}(${item.code ?? 'denied'})`).join(', ')}。` +
+                '请在具备写权限的模式下重跑，或把输出目录改到会话工作区内。',
+            });
+          } else {
+            logger.warn('output directory denied; retrying inside the workspace', { dir: candidate.dir });
+            const retry = await runOnce(candidate.dir, workspace);
+            retry.workspaceKind = kind;
+            retry.relocatedFrom = options.outputDir !== '' ? options.outputDir : undefined;
+            retry.relocationMarker = candidate.marker;
+            retry.warnings.unshift({
+              stage: 'output',
+              code: 'output-relocated',
+              message:
+                `原输出目录被沙箱拒绝写入（${denied[0].message}），已改写到具备写权限的目录 ${toPosix(candidate.dir)}。` +
+                '如需写入原目录，请在具备写权限的模式下重跑，或先扩展可写根。',
+            });
+            relocated = { from: options.outputDir, to: candidate.dir, tried: candidate.tried };
+            report = retry;
+          }
+        }
       }
 
       const noteFiles = report.outputs?.noteFiles ?? [];
+      const writtenNoteFiles = report.outputs?.writtenNoteFiles ?? [];
+      const outputUnavailable = report.errors.some((error) => error.code === 'OUTPUT_DIR_UNAVAILABLE');
       const summary = [
-        `CourseNotes ${report.runId}：解析 ${report.stages?.parse?.summary?.parsedCount ?? 0}/${report.documents.length} 个文件，`,
+        `CourseNotes ${report.runId}（${PIPELINE_VERSION}）：状态 ${report.completion}，`,
+        `解析 ${report.stages?.parse?.summary?.parsedCount ?? 0}/${report.documents.length} 个文件，`,
         `章节 ${report.knowledge?.chapters?.length ?? 0}，知识点 ${report.knowledge?.counts?.keyPoints ?? 0}，`,
-        `输出 ${noteFiles.length} 个笔记文件到 ${toPosix(report.outputDir)}。`,
+        outputUnavailable
+          ? `笔记输出失败：${writtenNoteFiles.length}/${noteFiles.length} 个笔记文件写入成功。`
+          : `输出 ${writtenNoteFiles.length} 个笔记文件到 ${toPosix(report.outputDir)}。`,
         report.coverage ? `${summariseCoverage(report.coverage)}。` : '',
-        report.retrieval?.performed ? `外部检索 ${report.retrieval.resultCount} 条查询 / ${report.retrieval.sourceCount} 个来源。` : report.retrieval?.summary ?? '',
+        report.quality ? `${summariseQuality(report.quality)}。` : '',
+        report.authoring?.attempted
+          ? `分块撰写 ${report.authoring.chunks?.length ?? 0} 块 / 已撰写 ${report.authoring.authoredPointCount}/${report.authoring.totalPoints} 个知识点。`
+          : report.authoring?.skippedReason ?? '',
+        report.retrieval?.performed
+          ? `外部检索 ${report.retrieval.resultCount} 条查询 / ${report.retrieval.sourceCount} 个来源；证据映射 ${report.evidence?.pointsWithEvidence ?? 0}/${report.evidence?.points ?? 0} 个知识点。`
+          : report.retrieval?.summary ?? '',
+        report.vision?.stats?.total > 0 ? report.vision.summary : '',
         report.errors.length > 0 ? `\n⚠ ${report.errors.length} 个错误，详见 run-report.md。` : '',
-        relocated ? '\n⚠ 输出目录已被迁移，详见报告。' : '',
+        relocated ? `\n⚠ 输出目录已被迁移到 ${toPosix(relocated.to)}，详见报告。` : '',
       ]
         .filter((part) => part !== '')
         .join('');
 
-      // Optional fields are omitted, never `undefined`: the registry requires
-      // the returned body to be lossless JSON and rejects `undefined` members.
+      /*
+       * Optional fields are omitted, never `undefined`: the registry requires the
+       * returned body to be lossless JSON and rejects `undefined` members.
+       *
+       * `noteFiles` lists the intended files; `writtenNoteFiles` lists the ones a
+       * reader can actually open.  A caller that shows the first as "produced"
+       * would claim notes that do not exist, so both are returned explicitly.
+       */
       const artifacts = {
         outputDir: toPosix(report.outputDir),
         workDir: toPosix(report.workDir),
         noteFiles: noteFiles.map((file) => toPosix(file)),
+        writtenNoteFiles: writtenNoteFiles.map((file) => toPosix(file)),
         knowledgeJson: 'knowledge.json',
         runReport: 'run-report.md',
         parseReport: 'run-report.md',
       };
       if (report.coverage) artifacts.coverageReport = 'coverage-report.md';
+      if (report.evidence) artifacts.evidence = '.coursenotes/evidence.json';
+      if (report.vision) artifacts.visionTasks = '.coursenotes/vision-results.json';
 
       return jsonSafe({
-        ok: report.errors.length === 0 && noteFiles.length > 0,
+        // `ok` means "the caller has usable notes", so it is decided by writes that
+        // succeeded — not by the absence of error objects.
+        ok: writtenNoteFiles.length > 0 && !outputUnavailable,
+        completion: report.completion,
         summary,
-        brief: buildToolBrief(report, stageEnabled(stages, 'output') && stageEnabled(stages, 'generate')),
+        brief: buildToolBrief(
+          report,
+          stageEnabled(stages, 'output') && stageEnabled(stages, 'generate'),
+        ),
         artifacts,
       });
     },
@@ -440,6 +612,10 @@ function buildToolBrief(report, includeBrief) {
   lines.push('');
   lines.push(`- 运行 / Run: \`${report.runId}\`（CourseNotes ${PIPELINE_VERSION}）`);
   lines.push(`- 课程 / Course: ${report.courseName}`);
+  lines.push(`- 状态 / Completion: **\`${report.completion}\`** — ${report.completionReason ?? ''}`);
+  lines.push(
+    `- 文件写入 / Writes: ${report.sandboxed ? 'Harness ctx.fs（沙箱策略生效）' : 'Node fs（CLI 模式）'}`,
+  );
   lines.push(`- 输出目录 / Output: \`${toPosix(report.outputDir)}\``);
   lines.push(`- 过程目录 / Work dir: \`${toPosix(report.workDir)}\``);
   const parsed = report.stages?.parse?.summary;
@@ -453,8 +629,32 @@ function buildToolBrief(report, includeBrief) {
       `- 知识结构 / Knowledge: ${report.knowledge.counts.chapters} 章，${report.knowledge.counts.keyPoints} 知识点，${report.knowledge.counts.glossary} 术语`,
     );
   }
+  if (report.authoring?.attempted) {
+    lines.push(
+      `- 分块撰写 / Authoring: ${report.authoring.plan?.tasks ?? 0} 个分块（每块 ${report.authoring.chunkChars} 字符），已撰写 ${report.authoring.authoredPointCount}/${report.authoring.totalPoints} 个知识点${
+        report.authoring.repairedPoints?.length > 0 ? `，局部补全 ${report.authoring.repairedPoints.length} 个` : ''
+      }`,
+    );
+    if (report.authoring.pointIdsNotAuthored?.length > 0) {
+      lines.push(
+        `  - ⚠ 未撰写 / not authored: ${report.authoring.pointIdsNotAuthored.slice(0, 20).join(', ')}${report.authoring.pointIdsNotAuthored.length > 20 ? ' …' : ''}`,
+      );
+    }
+    if (report.authoring.chaptersNotPlanned?.length > 0) {
+      lines.push(`  - ⚠ 未进入分块计划的章节 / chapters never planned: ${report.authoring.chaptersNotPlanned.join(', ')}`);
+    }
+  } else if (report.authoring?.skippedReason) {
+    lines.push(`- 未执行模型撰写 / Authoring skipped: ${report.authoring.skippedReason}`);
+  }
   if (report.coverage) lines.push(`- ${summariseCoverage(report.coverage)}`);
+  if (report.quality) lines.push(`- ${summariseQuality(report.quality)}`);
   lines.push(`- 检索 / Retrieval: ${report.retrieval?.summary ?? '—'}`);
+  if (report.evidence) {
+    lines.push(
+      `- 证据映射 / Evidence: ${report.evidence.pointsWithEvidence}/${report.evidence.points} 个知识点有外部证据，${report.evidence.evidenceItems} 条摘录，可引用 URL ${report.evidence.allowlistedUrls} 个`,
+    );
+  }
+  if (report.vision?.stats?.total > 0) lines.push(`- ${report.vision.summary}`);
   if (report.outputs?.noteFiles?.length > 0) {
     lines.push('- 笔记文件 / Note files:');
     for (const file of report.outputs.noteFiles) lines.push(`  - ${toPosix(file)}`);
@@ -485,6 +685,19 @@ function buildToolBrief(report, includeBrief) {
     lines.push('## 本次运行的能力限制 / Capability limits of this run');
     for (const limitation of report.limitations) lines.push(`- ${limitation}`);
   }
+  if (includeBrief && report.completion !== 'verified') {
+    lines.push('');
+    lines.push('## 未完成时的下一步 / When the run is not `verified`');
+    lines.push(
+      '- 笔记中仍带 `COURSENOTES:TODO` 标记的位置需要补全；补全后重新运行 `check_notes_coverage` 复核。',
+    );
+    lines.push(
+      '- 图表（`图表解读 / Figures to Interpret` 小节）需要具备视觉能力的 Agent 读取图片后，把结果写入 `.coursenotes/vision-results.json`（格式见该文件内的 `pending` 字段），再重跑。',
+    );
+    lines.push(
+      '- 需要更细的原文时读取 `knowledge.json`；需要检索证据原文时读取 `.coursenotes/evidence.json`。',
+    );
+  }
   if (includeBrief && report.brief?.savePrompt) {
     lines.push('');
     lines.push(report.brief.savePrompt);
@@ -508,8 +721,10 @@ function buildCoverageTool(ctx, config) {
     description: [
       'Compare the knowledge points extracted from the course materials with the knowledge actually present in',
       'generated notes, and report covered / partially covered / uncovered items plus Markdown structure',
-      'problems (unbalanced fences, broken relative links, unclosed formulas). Coverage is an internal',
-      'completeness indicator and does not measure explanation correctness.',
+      'problems (unbalanced fences, broken relative links, unclosed formulas). It also reports multi-dimensional',
+      'quality: structure, authored content, bilingual completeness, formula rendering/explanation, and citation',
+      'validity against the run\'s evidence index. Every number is textual; none of them measures whether an',
+      'explanation is correct.',
     ].join(' '),
     parameters: {
       type: 'object',
@@ -562,19 +777,21 @@ function buildCoverageTool(ctx, config) {
       if (notes.length === 0) {
         throw new Error(`no Markdown note files found under ${notesDir}`);
       }
-      // Rebuild from `chapters`, which carry the per-chapter point lists.  A
-      // flat `keyPoints` array would lose the chapter association, and since
-      // point ids restart at K001 per chapter, two chapters' K001 would then be
-      // indistinguishable.
+      const config2 = normalizeConfig({ ...config, ...(args?.language ? { language: args.language } : {}) });
+      /*
+       * Rebuild the point list from `chapters`, which carries the per-chapter
+       * point lists.  A flat `keyPoints` array loses the chapter association, and
+       * the note files are matched by chapter-qualified key.
+       */
       const chapterList = Array.isArray(knowledge.chapters) ? knowledge.chapters : [];
       const fromChapters = chapterList.flatMap((chapter) =>
         (chapter.points ?? []).map((point) => ({
           ...point,
           chapterIndex: chapter.index,
           chapterTitle: chapter.title,
+          chapterKey: `Chapter_${String(chapter.index).padStart(2, '0')}`,
           terms: point.terms ?? [],
           sourceText: point.sourceText ?? '',
-          chapterKey: `Chapter_${String(chapter.index).padStart(2, '0')}`,
         })),
       );
       const fromFlat = (knowledge.keyPoints ?? []).map((point) => ({
@@ -584,8 +801,6 @@ function buildCoverageTool(ctx, config) {
         terms: point.terms ?? [],
         sourceText: point.sourceText ?? '',
       }));
-      // Prefer the chapter-derived list; fall back to the flat list only when
-      // the file has no chapter detail (e.g. a hand-written baseline).
       const points = fromChapters.length > 0 ? fromChapters : fromFlat;
       if (points.length === 0) {
         throw new Error(`knowledge_json contains no knowledge points: ${knowledgePath}`);
@@ -599,15 +814,36 @@ function buildCoverageTool(ctx, config) {
       const coverage = checkCoverage(normalised, notes);
       const structureIssues = [];
       for (const note of notes) structureIssues.push(...checkNoteStructure(note.text, note.path).issues);
-      const markdown = renderCoverageMarkdown(coverage, structureIssues);
+
+      /*
+       * The evidence index is optional here: `check_notes_coverage` is also used
+       * on hand-written notes and on runs from older versions.  When it is
+       * present, citation validity becomes a real check; when it is not, the
+       * report says the check could not run rather than reporting zero problems.
+       */
+      const evidence = readEvidenceIndex(notesDir, fs);
+      const citations = validateCitations(notes, evidence);
+      const quality = checkQuality(normalised, notes, {
+        language: config2.language,
+        evidenceIndex: evidence,
+        citations,
+      });
+      const markdown = `${renderCoverageMarkdown(coverage, structureIssues)}\n${renderQualityMarkdown(quality)}`;
       let reportPath;
       if (args?.write_report !== false) {
-        const logger = loggerFor(ctx, normalizeConfig(config));
-        const { workspace } = workspaceFor(ctx, logger);
+        const logger = loggerFor(ctx, config2);
+        const { workspace } = workspaceFor(ctx, logger, { cwd: path.dirname(knowledgePath) });
         const target = path.join(notesDir, 'coverage-report.md');
         const outcome = await workspace.writeText(target, markdown);
         if (outcome.ok) reportPath = target;
-        else logger.warn('coverage report not written', { code: outcome.code, message: outcome.message });
+        else {
+          logger.warn('coverage report not written', { code: outcome.code, message: outcome.message });
+          structureIssues.push({
+            severity: 'warn',
+            code: outcome.code ?? 'write-failed',
+            message: `coverage-report.md 未写入：${outcome.message}`,
+          });
+        }
       }
       void exec;
       /*
@@ -618,13 +854,30 @@ function buildCoverageTool(ctx, config) {
        */
       const result = jsonSafe({
         ok: true,
-        summary: `${summariseCoverage(coverage)}；结构问题 ${structureIssues.length} 项；术语 ${coverage.glossary.present}/${coverage.glossary.total} 出现在笔记中；公式 ${coverage.formulas.covered}/${coverage.formulas.total} 已覆盖。`,
+        summary: `${summariseCoverage(coverage)}；${summariseQuality(quality)}；结构问题 ${structureIssues.length} 项；术语 ${coverage.glossary.present}/${coverage.glossary.total} 出现在笔记中。`,
         report: markdown,
       });
       if (reportPath) result.reportPath = toPosix(reportPath);
       return result;
     },
   };
+}
+
+/** Read the run's evidence index when it exists next to the notes. */
+function readEvidenceIndex(dir, fs) {
+  for (const candidate of [
+    path.join(dir, '.coursenotes', 'evidence.json'),
+    path.join(dir, 'evidence.json'),
+  ]) {
+    try {
+      if (!fs.existsSync(candidate)) continue;
+      const parsed = JSON.parse(fs.readFileSync(candidate, 'utf8'));
+      if (Array.isArray(parsed?.sources)) return { sources: parsed.sources };
+    } catch {
+      /* a corrupt sidecar must not break the check: fall through to "no index" */
+    }
+  }
+  return null;
 }
 
 /* ------------------------------------------------------------------ tool: probe */
@@ -781,6 +1034,7 @@ function cfgDump(config) {
     workDir: config.workDir,
     language: config.language,
     detailLevel: config.detailLevel,
+    mode: config.mode,
     enableWebSearch: config.enableWebSearch,
     maxSearches: config.maxSearches,
     maxFetches: config.maxFetches,
@@ -799,8 +1053,17 @@ function cfgDump(config) {
     chapterHeadingLevel: config.chapterHeadingLevel,
     parserScript: config.parserScript,
     logLevel: config.logLevel,
+    chunkChars: config.chunkChars,
+    maxPointsPerChunk: config.maxPointsPerChunk,
+    chunkStrategy: config.chunkStrategy,
+    llmMaxAttempts: config.llmMaxAttempts,
+    llmRetryBackoffMs: config.llmRetryBackoffMs,
     llmProvider: config.llmProvider ?? '',
     llmModel: config.llmModel ?? '',
+    maxHarnessAssetBytes: config.maxHarnessAssetBytes,
+    evidencePerPoint: config.evidencePerPoint,
+    evidenceCharBudget: config.evidenceCharBudget,
+    evidenceExcerptChars: config.evidenceExcerptChars,
   };
 }
 
@@ -886,7 +1149,7 @@ export function apply(ctx, rawConfig) {
 }
 
 export default { name, inject, apply, defaultConfig: DEFAULTS };
-export { runPipeline, renderRunReport, checkCoverage, loadNoteTexts, createNodeWorkspace, formatBytes };
+export { runPipeline, renderRunReport, checkCoverage, checkQuality, loadNoteTexts, createNodeWorkspace, createHarnessWorkspace, formatBytes };
 
 /**
  * Programmatic access, deliberately *not* registered as a Cordis service.
