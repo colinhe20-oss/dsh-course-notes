@@ -3,11 +3,13 @@
 ## 课程信息 / Course Info
 
 - 课程名称 / Course: fixture_outline
-- 生成时间 / Generated at: 2026-10-13T14:21:43.048Z
-- 运行编号 / Run id: `run-20261013-142142`
+- 生成时间 / Generated at: 2026-01-01T00:00:00.000Z
+- 运行编号 / Run id: `run-20260101-000000`
 - 输出语言 / Language: bilingual
 - 详细程度 / Detail level: comprehensive
-- 解析后端 / Parsing backend: Node-native only
+- 生成模式 / Mode: scaffold
+- 运行状态 / Completion: scaffold_created
+- 解析后端 / Parsing backend: <python> (Python 3.12.14)
 
 ### 原始课件 / Source Materials
 
@@ -36,8 +38,9 @@
 
 - 提取知识点 / extracted: 21；覆盖 / covered: 0；部分覆盖 / partial: 0；未覆盖 / missing: 21
 - 覆盖率（内部完整性指标，不代表讲解正确性）/ coverage ratio: 0.0%
+- 全维度通过（结构+内容+双语+公式+引用）/ all dimensions complete: 0/21（0.0%）
 
-详见 [覆盖率报告](coverage-report.md)。
+详见 [覆盖率报告](coverage-report.md)（含多维质量检查）。
 
 ## 关键术语表 / Glossary
 
@@ -57,3 +60,4 @@
 
 - 详情见 [run-report.md](run-report.md) 与 [coverage-report.md](coverage-report.md)。
 - 机器可读摘要见 `run-report.json`，知识点清单见 `knowledge.json`。
+- 检索证据原文见 `.coursenotes/evidence.json`，图表视觉任务见 `.coursenotes/vision-results.json`。

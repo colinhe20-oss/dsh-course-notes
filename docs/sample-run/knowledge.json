@@ -61,29 +61,22 @@
     {
      "id": "K001",
      "title": "Neural Network Basics / 优化与反向传播",
-     "titleFull": "Neural Network Basics / 优化与反向传播",
      "kind": "concept",
-     "script": "latin",
      "document": "D02-fixture-lecture",
      "documentName": "fixture_lecture.pptx",
      "locator": "slide 1",
      "section": "",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "Neural Network Basics / 优化与反向传播",
-     "key": "concept:neural network basics / 优化与反向传播"
+     "sourceText": "Neural Network Basics / 优化与反向传播"
     },
     {
      "id": "K002",
      "title": "梯度下降（Gradient Descent, GD）沿负梯度方向更新参数",
-     "titleFull": "梯度下降（Gradient Descent, GD）沿负梯度方向更新参数",
      "kind": "concept",
-     "script": "cjk",
      "document": "D02-fixture-lecture",
      "documentName": "fixture_lecture.pptx",
      "locator": "slide 2",
      "section": "梯度下降与学习率",
-     "mathLike": false,
      "terms": [
       {
        "zh": "梯度下降",
@@ -91,105 +84,62 @@
        "abbr": "GD"
       }
      ],
-     "sourceText": "梯度下降（Gradient Descent, GD）沿负梯度方向更新参数",
-     "key": "concept:梯度下降（gradient descent, gd）沿负梯度方向更新参数"
+     "sourceText": "梯度下降（Gradient Descent, GD）沿负梯度方向更新参数"
     },
     {
      "id": "K003",
      "title": "强调学习率对收敛性的影响。",
-     "titleFull": "强调学习率对收敛性的影响。",
      "kind": "concept",
-     "script": "cjk",
      "document": "D02-fixture-lecture",
      "documentName": "fixture_lecture.pptx",
      "locator": "slide 2 notes",
      "section": "随机梯度下降（Stochastic Gradient Descent, SGD）每次用一个样本估计梯度",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "强调学习率对收敛性的影响。",
-     "key": "concept:强调学习率对收敛性的影响。"
+     "sourceText": "强调学习率对收敛性的影响。"
     },
     {
      "id": "K004",
      "title": "表格：优化器 / 更新依据 / 典型学习率",
-     "titleFull": "优化器 | 更新依据 | 典型学习率\nSGD | 当前样本梯度 | 0.01 - 0.1\nMomentum | 梯度指数滑动平均 | 0.01\nAdam | 一阶/二阶矩估计 | 0.001",
      "kind": "table",
-     "script": "unknown",
      "document": "D02-fixture-lecture",
      "documentName": "fixture_lecture.pptx",
      "locator": "slide 3",
      "section": "优化器对比",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "优化器 | 更新依据 | 典型学习率\nSGD | 当前样本梯度 | 0.01 - 0.1\nMomentum | 梯度指数滑动平均 | 0.01\nAdam | 一阶/二阶矩估计 | 0.001",
-     "rows": [
-      [
-       "优化器",
-       "更新依据",
-       "典型学习率"
-      ],
-      [
-       "SGD",
-       "当前样本梯度",
-       "0.01 - 0.1"
-      ],
-      [
-       "Momentum",
-       "梯度指数滑动平均",
-       "0.01"
-      ],
-      [
-       "Adam",
-       "一阶/二阶矩估计",
-       "0.001"
-      ]
-     ],
-     "key": "table:表格：优化器 / 更新依据 / 典型学习率"
+     "sourceText": "优化器 | 更新依据 | 典型学习率\nSGD | 当前样本梯度 | 0.01 - 0.1\nMomentum | 梯度指数滑动平均 | 0.01\nAdam | 一阶/二阶矩估计 | 0.001"
     },
     {
      "id": "K005",
      "title": "链式法则：dL/dW = dL/dy * dy/dz * dz/dW",
-     "titleFull": "链式法则：dL/dW = dL/dy * dy/dz * dz/dW",
      "kind": "concept",
-     "script": "latin",
      "document": "D02-fixture-lecture",
      "documentName": "fixture_lecture.pptx",
      "locator": "slide 4",
      "section": "反向传播推导要点",
-     "mathLike": true,
      "terms": [],
-     "sourceText": "链式法则：dL/dW = dL/dy * dy/dz * dz/dW",
-     "key": "concept:链式法则：dl/dw = dl/dy * dy/dz * dz/dw"
+     "sourceText": "链式法则：dL/dW = dL/dy * dy/dz * dz/dW"
     },
     {
      "id": "K006",
      "title": "其中 z = Wx + b，y = sigma(z)，sigma 为激活函数",
-     "titleFull": "其中 z = Wx + b，y = sigma(z)，sigma 为激活函数",
      "kind": "concept",
-     "script": "latin",
      "document": "D02-fixture-lecture",
      "documentName": "fixture_lecture.pptx",
      "locator": "slide 4",
      "section": "反向传播推导要点",
-     "mathLike": true,
      "terms": [],
-     "sourceText": "其中 z = Wx + b，y = sigma(z)，sigma 为激活函数",
-     "key": "concept:其中 z = wx + b，y = sigma(z)，sigma 为激活函数"
+     "sourceText": "其中 z = Wx + b，y = sigma(z)，sigma 为激活函数"
     },
     {
      "id": "K007",
      "title": "雅可比矩阵维度：dL/dz 为 (n,1)，dz/dW 为 (n,m)",
-     "titleFull": "雅可比矩阵维度：dL/dz 为 (n,1)，dz/dW 为 (n,m)",
      "kind": "concept",
-     "script": "cjk",
      "document": "D02-fixture-lecture",
      "documentName": "fixture_lecture.pptx",
      "locator": "slide 4",
      "section": "反向传播推导要点",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "雅可比矩阵维度：dL/dz 为 (n,1)，dz/dW 为 (n,m)",
-     "key": "concept:雅可比矩阵维度：dl/dz 为 (n,1)，dz/dw 为 (n,m)"
+     "sourceText": "雅可比矩阵维度：dL/dz 为 (n,1)，dz/dW 为 (n,m)"
     }
    ],
    "formulas": [
@@ -262,14 +212,11 @@
     {
      "id": "K008",
      "title": "计算机网络（Computer Network）将地理位置不同的计算机互联，实现资源共享与信息传递。",
-     "titleFull": "计算机网络（Computer Network）将地理位置不同的计算机互联，实现资源共享与信息传递。",
      "kind": "architecture",
-     "script": "cjk",
      "document": "D03-fixture-outline",
      "documentName": "fixture_outline.docx",
      "locator": "paragraph 2",
      "section": "",
-     "mathLike": false,
      "terms": [
       {
        "zh": "计算机网络",
@@ -277,20 +224,16 @@
        "abbr": ""
       }
      ],
-     "sourceText": "计算机网络（Computer Network）将地理位置不同的计算机互联，实现资源共享与信息传递。",
-     "key": "architecture:计算机网络（computer network）将地理位置不同的计算机互联，实现资源共享与信息传递。"
+     "sourceText": "计算机网络（Computer Network）将地理位置不同的计算机互联，实现资源共享与信息传递。"
     },
     {
      "id": "K009",
      "title": "OSI 七层模型：物理层（Physical Layer）、数据链路层（Data Link Layer, DLL）、网…",
-     "titleFull": "OSI 七层模型：物理层（Physical Layer）、数据链路层（Data Link Layer, DLL）、网络层（Network Layer）、传输层（Transport Layer）、会话层、表示层、应用层。",
      "kind": "architecture",
-     "script": "cjk",
      "document": "D03-fixture-outline",
      "documentName": "fixture_outline.docx",
      "locator": "paragraph 4",
      "section": "OSI 参考模型",
-     "mathLike": false,
      "terms": [
       {
        "zh": "物理层",
@@ -313,67 +256,40 @@
        "abbr": ""
       }
      ],
-     "sourceText": "OSI 七层模型：物理层（Physical Layer）、数据链路层（Data Link Layer, DLL）、网络层（Network Layer）、传输层（Transport Layer）、会话层、表示层、应用层。",
-     "key": "architecture:osi 七层模型：物理层（physical layer）、数据链路层（data link layer, dll）、网…"
+     "sourceText": "OSI 七层模型：物理层（Physical Layer）、数据链路层（Data Link Layer, DLL）、网络层（Network Layer）、传输层（Transport Layer）、会话层、表示层、应用层。"
     },
     {
      "id": "K010",
      "title": "网络层 PDU 称为分组（packet），传输层 PDU 称为报文段（segment）。",
-     "titleFull": "网络层 PDU 称为分组（packet），传输层 PDU 称为报文段（segment）。",
      "kind": "definition",
-     "script": "cjk",
      "document": "D03-fixture-outline",
      "documentName": "fixture_outline.docx",
      "locator": "paragraph 5",
      "section": "OSI 参考模型",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "网络层 PDU 称为分组（packet），传输层 PDU 称为报文段（segment）。",
-     "key": "definition:网络层 pdu 称为分组（packet），传输层 pdu 称为报文段（segment）。"
+     "sourceText": "网络层 PDU 称为分组（packet），传输层 PDU 称为报文段（segment）。"
     },
     {
      "id": "K011",
      "title": "表格：对比项 / 面向连接 vs 无连接",
-     "titleFull": "对比项 | 面向连接 vs 无连接\n连接建立 | 需要握手 / 无需握手\n典型协议 | TCP / UDP",
      "kind": "table",
-     "script": "unknown",
      "document": "D03-fixture-outline",
      "documentName": "fixture_outline.docx",
      "locator": "table 1",
      "section": "关键对比",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "对比项 | 面向连接 vs 无连接\n连接建立 | 需要握手 / 无需握手\n典型协议 | TCP / UDP",
-     "rows": [
-      [
-       "对比项",
-       "面向连接 vs 无连接"
-      ],
-      [
-       "连接建立",
-       "需要握手 / 无需握手"
-      ],
-      [
-       "典型协议",
-       "TCP / UDP"
-      ]
-     ],
-     "key": "table:表格：对比项 / 面向连接 vs 无连接"
+     "sourceText": "对比项 | 面向连接 vs 无连接\n连接建立 | 需要握手 / 无需握手\n典型协议 | TCP / UDP"
     },
     {
      "id": "K012",
      "title": "信道容量遵循香农公式 C = B * log2(1 + S/N)，其中 B 为带宽，S/N 为信噪比。",
-     "titleFull": "信道容量遵循香农公式 C = B * log2(1 + S/N)，其中 B 为带宽，S/N 为信噪比。",
      "kind": "formula",
-     "script": "cjk",
      "document": "D03-fixture-outline",
      "documentName": "fixture_outline.docx",
      "locator": "paragraph 8",
      "section": "公式示例",
-     "mathLike": true,
      "terms": [],
-     "sourceText": "信道容量遵循香农公式 C = B * log2(1 + S/N)，其中 B 为带宽，S/N 为信噪比。",
-     "key": "formula:信道容量遵循香农公式 c = b * log2(1 + s/n)，其中 b 为带宽，s/n 为信噪比。"
+     "sourceText": "信道容量遵循香农公式 C = B * log2(1 + S/N)，其中 B 为带宽，S/N 为信噪比。"
     }
    ],
    "formulas": [
@@ -431,91 +347,57 @@
     {
      "id": "K013",
      "title": "传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。",
-     "titleFull": "传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。",
      "kind": "concept",
-     "script": "cjk",
      "document": "D04-fixture-ch3",
      "documentName": "fixture_ch3.md",
      "locator": "line 5",
      "section": "复用与分用",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。",
-     "key": "concept:传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。"
+     "sourceText": "传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。"
     },
     {
      "id": "K014",
      "title": "无连接分用：UDP 仅使用目的端口",
-     "titleFull": "无连接分用：UDP 仅使用目的端口",
      "kind": "concept",
-     "script": "cjk",
      "document": "D04-fixture-ch3",
      "documentName": "fixture_ch3.md",
      "locator": "line 7",
      "section": "复用与分用",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "无连接分用：UDP 仅使用目的端口",
-     "key": "concept:无连接分用：udp 仅使用目的端口"
+     "sourceText": "无连接分用：UDP 仅使用目的端口"
     },
     {
      "id": "K015",
      "title": "面向连接分用：TCP 使用四元组 (源IP, 源端口, 目的IP, 目的端口)",
-     "titleFull": "面向连接分用：TCP 使用四元组 (源IP, 源端口, 目的IP, 目的端口)",
      "kind": "concept",
-     "script": "cjk",
      "document": "D04-fixture-ch3",
      "documentName": "fixture_ch3.md",
      "locator": "line 8",
      "section": "复用与分用",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "面向连接分用：TCP 使用四元组 (源IP, 源端口, 目的IP, 目的端口)",
-     "key": "concept:面向连接分用：tcp 使用四元组 (源ip, 源端口, 目的ip, 目的端口)"
+     "sourceText": "面向连接分用：TCP 使用四元组 (源IP, 源端口, 目的IP, 目的端口)"
     },
     {
      "id": "K016",
      "title": "停等协议（Stop-and-Wait）的利用率： $$U = \\frac{T_{transmit}}{T_{transmit} + 2 \\cdot T_{prop}}$$",
-     "titleFull": "$$U = \\frac{T_{transmit}}{T_{transmit} + 2 \\cdot T_{prop}}$$",
      "kind": "formula",
-     "script": "latin",
      "document": "D04-fixture-ch3",
      "documentName": "fixture_ch3.md",
      "locator": "line 14",
      "section": "可靠传输",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "$$U = \\frac{T_{transmit}}{T_{transmit} + 2 \\cdot T_{prop}}$$",
-     "key": "formula:停等协议（stop-and-wait）的利用率： $$u = \\frac{t_{transmit}}{t_{transmit} + 2 \\cdot t_{pro"
+     "sourceText": "$$U = \\frac{T_{transmit}}{T_{transmit} + 2 \\cdot T_{prop}}$$"
     },
     {
      "id": "K017",
      "title": "表格：机制 / 作用",
-     "titleFull": "机制 | 作用\n超时重传 | 处理丢失\n累计确认 | 提高效率",
      "kind": "table",
-     "script": "unknown",
      "document": "D04-fixture-ch3",
      "documentName": "fixture_ch3.md",
      "locator": "line 16",
      "section": "可靠传输",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "机制 | 作用\n超时重传 | 处理丢失\n累计确认 | 提高效率",
-     "rows": [
-      [
-       "机制",
-       "作用"
-      ],
-      [
-       "超时重传",
-       "处理丢失"
-      ],
-      [
-       "累计确认",
-       "提高效率"
-      ]
-     ],
-     "key": "table:表格：机制 / 作用"
+     "sourceText": "机制 | 作用\n超时重传 | 处理丢失\n累计确认 | 提高效率"
     }
    ],
    "formulas": [
@@ -545,44 +427,33 @@
     {
      "id": "K018",
      "title": "实验一 数据链路层抓包",
-     "titleFull": "实验一 数据链路层抓包",
      "kind": "experiment",
-     "script": "cjk",
      "document": "D05-fixture-lab",
      "documentName": "fixture_lab.txt",
      "locator": "line 1",
      "section": "",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "实验一 数据链路层抓包",
-     "key": "experiment:实验一 数据链路层抓包"
+     "sourceText": "实验一 数据链路层抓包"
     },
     {
      "id": "K019",
      "title": "1. 使用 Wireshark 抓取 ARP 请求与应答。",
-     "titleFull": "1. 使用 Wireshark 抓取 ARP 请求与应答。",
      "kind": "concept",
-     "script": "cjk",
      "document": "D05-fixture-lab",
      "documentName": "fixture_lab.txt",
      "locator": "line 2",
      "section": "",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "1. 使用 Wireshark 抓取 ARP 请求与应答。",
-     "key": "concept:1. 使用 wireshark 抓取 arp 请求与应答。"
+     "sourceText": "1. 使用 Wireshark 抓取 ARP 请求与应答。"
     },
     {
      "id": "K020",
      "title": "2. 分析以太网帧（Ethernet frame）首部字段：目的 MAC、源 MAC、类型。",
-     "titleFull": "2. 分析以太网帧（Ethernet frame）首部字段：目的 MAC、源 MAC、类型。",
      "kind": "concept",
-     "script": "cjk",
      "document": "D05-fixture-lab",
      "documentName": "fixture_lab.txt",
      "locator": "line 3",
      "section": "",
-     "mathLike": false,
      "terms": [
       {
        "zh": "分析以太网帧",
@@ -590,23 +461,18 @@
        "abbr": ""
       }
      ],
-     "sourceText": "2. 分析以太网帧（Ethernet frame）首部字段：目的 MAC、源 MAC、类型。",
-     "key": "concept:2. 分析以太网帧（ethernet frame）首部字段：目的 mac、源 mac、类型。"
+     "sourceText": "2. 分析以太网帧（Ethernet frame）首部字段：目的 MAC、源 MAC、类型。"
     },
     {
      "id": "K021",
      "title": "3. 记录 CRC 校验字段长度，思考其检错能力。",
-     "titleFull": "3. 记录 CRC 校验字段长度，思考其检错能力。",
      "kind": "concept",
-     "script": "cjk",
      "document": "D05-fixture-lab",
      "documentName": "fixture_lab.txt",
      "locator": "line 4",
      "section": "",
-     "mathLike": false,
      "terms": [],
-     "sourceText": "3. 记录 CRC 校验字段长度，思考其检错能力。",
-     "key": "concept:3. 记录 crc 校验字段长度，思考其检错能力。"
+     "sourceText": "3. 记录 CRC 校验字段长度，思考其检错能力。"
     }
    ],
    "formulas": [],

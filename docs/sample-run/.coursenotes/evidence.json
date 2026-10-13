@@ -1,0 +1,336 @@
+{
+ "stats": {
+  "points": 21,
+  "pointsWithEvidence": 0,
+  "pointsWithLectureOnly": 21,
+  "externalChars": 0,
+  "evidenceItems": 0,
+  "allowlistedUrls": 0,
+  "retrievedAt": "2026-01-01T00:00:00.000Z",
+  "limits": {
+   "excerptChars": 900,
+   "lectureChars": 900,
+   "perPoint": 4,
+   "totalChars": 24000,
+   "retrievedAt": "2026-01-01T00:00:00.000Z"
+  }
+ },
+ "sources": [],
+ "points": [
+  {
+   "pointId": "K001",
+   "chapterIndex": 1,
+   "topic": "Neural Network Basics / 优化与反向传播",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lecture.pptx",
+     "locator": "slide 1",
+     "section": "",
+     "chars": 31
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K002",
+   "chapterIndex": 1,
+   "topic": "梯度下降（Gradient Descent, GD）沿负梯度方向更新参数",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lecture.pptx",
+     "locator": "slide 2",
+     "section": "梯度下降与学习率",
+     "chars": 36
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K003",
+   "chapterIndex": 1,
+   "topic": "强调学习率对收敛性的影响。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lecture.pptx",
+     "locator": "slide 2 notes",
+     "section": "随机梯度下降（Stochastic Gradient Descent, SGD）每次用一个样本估计梯度",
+     "chars": 13
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K004",
+   "chapterIndex": 1,
+   "topic": "表格：优化器 / 更新依据 / 典型学习率",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lecture.pptx",
+     "locator": "slide 3",
+     "section": "优化器对比",
+     "chars": 95
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K005",
+   "chapterIndex": 1,
+   "topic": "链式法则：dL/dW = dL/dy * dy/dz * dz/dW",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lecture.pptx",
+     "locator": "slide 4",
+     "section": "反向传播推导要点",
+     "chars": 34
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K006",
+   "chapterIndex": 1,
+   "topic": "其中 z = Wx + b，y = sigma(z)，sigma 为激活函数",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lecture.pptx",
+     "locator": "slide 4",
+     "section": "反向传播推导要点",
+     "chars": 38
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K007",
+   "chapterIndex": 1,
+   "topic": "雅可比矩阵维度：dL/dz 为 (n,1)，dz/dW 为 (n,m)",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lecture.pptx",
+     "locator": "slide 4",
+     "section": "反向传播推导要点",
+     "chars": 35
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K008",
+   "chapterIndex": 2,
+   "topic": "计算机网络（Computer Network）将地理位置不同的计算机互联，实现资源共享与信息传递。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_outline.docx",
+     "locator": "paragraph 2",
+     "section": "",
+     "chars": 49
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K009",
+   "chapterIndex": 2,
+   "topic": "OSI 七层模型：物理层（Physical Layer）、数据链路层（Data Link Layer, DLL）、网…",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_outline.docx",
+     "locator": "paragraph 4",
+     "section": "OSI 参考模型",
+     "chars": 109
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K010",
+   "chapterIndex": 2,
+   "topic": "网络层 PDU 称为分组（packet），传输层 PDU 称为报文段（segment）。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_outline.docx",
+     "locator": "paragraph 5",
+     "section": "OSI 参考模型",
+     "chars": 44
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K011",
+   "chapterIndex": 2,
+   "topic": "表格：对比项 / 面向连接 vs 无连接",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_outline.docx",
+     "locator": "table 1",
+     "section": "关键对比",
+     "chars": 53
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K012",
+   "chapterIndex": 2,
+   "topic": "信道容量遵循香农公式 C = B * log2(1 + S/N)，其中 B 为带宽，S/N 为信噪比。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_outline.docx",
+     "locator": "paragraph 8",
+     "section": "公式示例",
+     "chars": 51
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K013",
+   "chapterIndex": 3,
+   "topic": "传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_ch3.md",
+     "locator": "line 5",
+     "section": "复用与分用",
+     "chars": 59
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K014",
+   "chapterIndex": 3,
+   "topic": "无连接分用：UDP 仅使用目的端口",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_ch3.md",
+     "locator": "line 7",
+     "section": "复用与分用",
+     "chars": 17
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K015",
+   "chapterIndex": 3,
+   "topic": "面向连接分用：TCP 使用四元组 (源IP, 源端口, 目的IP, 目的端口)",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_ch3.md",
+     "locator": "line 8",
+     "section": "复用与分用",
+     "chars": 39
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K016",
+   "chapterIndex": 3,
+   "topic": "停等协议（Stop-and-Wait）的利用率： $$U = \\frac{T_{transmit}}{T_{transmit} + 2 \\cdot T_{prop}}$$",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_ch3.md",
+     "locator": "line 14",
+     "section": "可靠传输",
+     "chars": 60
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K017",
+   "chapterIndex": 3,
+   "topic": "表格：机制 / 作用",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_ch3.md",
+     "locator": "line 16",
+     "section": "可靠传输",
+     "chars": 31
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K018",
+   "chapterIndex": 4,
+   "topic": "实验一 数据链路层抓包",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lab.txt",
+     "locator": "line 1",
+     "section": "",
+     "chars": 11
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K019",
+   "chapterIndex": 4,
+   "topic": "1. 使用 Wireshark 抓取 ARP 请求与应答。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lab.txt",
+     "locator": "line 2",
+     "section": "",
+     "chars": 29
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K020",
+   "chapterIndex": 4,
+   "topic": "2. 分析以太网帧（Ethernet frame）首部字段：目的 MAC、源 MAC、类型。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lab.txt",
+     "locator": "line 3",
+     "section": "",
+     "chars": 46
+    }
+   ],
+   "retrievedEvidence": []
+  },
+  {
+   "pointId": "K021",
+   "chapterIndex": 4,
+   "topic": "3. 记录 CRC 校验字段长度，思考其检错能力。",
+   "queries": [],
+   "lectureEvidence": [
+    {
+     "documentName": "fixture_lab.txt",
+     "locator": "line 4",
+     "section": "",
+     "chars": 25
+    }
+   ],
+   "retrievedEvidence": []
+  }
+ ]
+}

@@ -2,16 +2,20 @@
 
 ### 章节概述 / Chapter Overview
 
+<!-- COURSENOTES:SECTION C03-OVERVIEW START -->
+<!-- COURSENOTES:TODO --> 用 3–6 句写出本章概述：本章解决什么问题、与前后章的关系、学完后应具备的能力。
+<!-- COURSENOTES:SECTION C03-OVERVIEW END -->
+
 - 原始课件 / Source files: fixture_ch3.md
 - 知识点数量 / Knowledge points: 5
 - 公式候选 / Formula candidates: 1
 - 图表待解读 / Figures needing vision: 0
 
-<!-- COURSENOTES:TODO --> 用 3–6 句写出本章概述：本章解决什么问题、与前后章的关系、学完后应具备的能力。
-
 ### 本章学习目标 / Learning Objectives
 
+<!-- COURSENOTES:SECTION C03-OBJECTIVES START -->
 <!-- COURSENOTES:TODO --> 依据本章知识点写出 3–6 条可检验的学习目标（能推导/能实现/能对比/能判断）。
+<!-- COURSENOTES:SECTION C03-OBJECTIVES END -->
 
 ### 知识结构 / Knowledge Outline
 
@@ -22,7 +26,7 @@
 ### 详细知识点 / Detailed Knowledge Points
 
 <!-- COURSENOTES:POINT K013 START -->
-### 1. 传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。
+### K013 · 1. 传输层通过端口号（port number）实现复用（multiplexing）与分用（demultiplexing）。
 **类型 / Kind**: 概念　**来源 / Source**: fixture_ch3.md · line 5 · 复用与分用
 
 **术语定义 / Definition**
@@ -54,7 +58,7 @@
 <!-- COURSENOTES:POINT K013 END -->
 
 <!-- COURSENOTES:POINT K014 START -->
-### 2. 无连接分用：UDP 仅使用目的端口
+### K014 · 2. 无连接分用：UDP 仅使用目的端口
 **类型 / Kind**: 概念　**来源 / Source**: fixture_ch3.md · line 7 · 复用与分用
 
 **术语定义 / Definition**
@@ -86,7 +90,7 @@
 <!-- COURSENOTES:POINT K014 END -->
 
 <!-- COURSENOTES:POINT K015 START -->
-### 3. 面向连接分用：TCP 使用四元组 (源IP, 源端口, 目的IP, 目的端口)
+### K015 · 3. 面向连接分用：TCP 使用四元组 (源IP, 源端口, 目的IP, 目的端口)
 **类型 / Kind**: 概念　**来源 / Source**: fixture_ch3.md · line 8 · 复用与分用
 
 **术语定义 / Definition**
@@ -118,7 +122,7 @@
 <!-- COURSENOTES:POINT K015 END -->
 
 <!-- COURSENOTES:POINT K016 START -->
-### 4. 停等协议（Stop-and-Wait）的利用率： $$U = \frac{T_{transmit}}{T_{transmit} + 2 \cdot T_{prop}}$$
+### K016 · 4. 停等协议（Stop-and-Wait）的利用率： $$U = \frac{T_{transmit}}{T_{transmit} + 2 \cdot T_{prop}}$$
 **类型 / Kind**: 公式　**来源 / Source**: fixture_ch3.md · line 14 · 可靠传输
 
 **术语定义 / Definition**
@@ -158,7 +162,7 @@ $$
 <!-- COURSENOTES:POINT K016 END -->
 
 <!-- COURSENOTES:POINT K017 START -->
-### 5. 表格：机制 / 作用
+### K017 · 5. 表格：机制 / 作用
 **类型 / Kind**: 表格　**来源 / Source**: fixture_ch3.md · line 16 · 可靠传输
 
 **术语定义 / Definition**
@@ -195,11 +199,17 @@ $$
 
 - `U = \frac{T_{transmit}}{T_{transmit} + 2 \cdot T_{prop}}` — fixture_ch3.md · line 14（识别依据：inline LaTeX math in a text source）
 
+### 公式清单 / Formula Checklist
+
+<!-- COURSENOTES:SECTION C03-FORMULAS START -->
 <!-- COURSENOTES:TODO --> 为以上每个公式补全 LaTeX 表示、变量定义、成立条件、推导与数值示例。
+<!-- COURSENOTES:SECTION C03-FORMULAS END -->
 
 ### 本章总结 / Chapter Summary
 
+<!-- COURSENOTES:SECTION C03-SUMMARY START -->
 <!-- COURSENOTES:TODO --> 用要点+一句话结论总结本章，并指出与后续章节的衔接。
+<!-- COURSENOTES:SECTION C03-SUMMARY END -->
 
 ### 术语表 / Glossary
 
@@ -207,11 +217,15 @@ $$
 
 ### 重点与难点 / Key Points and Difficulties
 
+<!-- COURSENOTES:SECTION C03-DIFFICULTIES START -->
 <!-- COURSENOTES:TODO --> 标注本章重点与难点，并说明难在哪里（概念抽象/推导繁琐/易混淆/需要先修知识）。
+<!-- COURSENOTES:SECTION C03-DIFFICULTIES END -->
 
 ### 自测题 / Self-Assessment Questions
 
+<!-- COURSENOTES:SECTION C03-EXERCISES START -->
 <!-- COURSENOTES:TODO --> 生成 3–5 道可自测的问题（含答案要点），覆盖本章核心知识点。
+<!-- COURSENOTES:SECTION C03-EXERCISES END -->
 
 ### 参考资料 / References
 

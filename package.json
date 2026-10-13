@@ -1,17 +1,22 @@
 {
   "name": "course-notes",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "CourseNotes — turn course materials (PDF/PPTX/DOCX/Markdown/text/images) into structured, source-traceable bilingual study notes inside DeepSeek Harness.",
   "meta": {
     "title": "CourseNotes 智能课程笔记",
-    "description": "从课件（PDF/PPT/Word/Markdown/图片）提取全部知识点，结合网络资料补充，生成中英双语、可溯源的结构化 Markdown 学习笔记。"
+    "description": "从课件（PDF/PPT/Word/Markdown/图片）提取全部知识点，联网检索并建立证据映射，分块撰写中英双语、可溯源的结构化 Markdown 学习笔记。"
   },
   "exports": {
     ".": "./index.js",
     "./cli": "./cli.js",
     "./pipeline": "./lib/pipeline.js",
     "./config": "./lib/config.js",
+    "./authoring": "./lib/authoring.js",
+    "./chunk": "./lib/chunk.js",
+    "./evidence": "./lib/evidence.js",
+    "./vision": "./lib/vision.js",
+    "./coverage": "./lib/coverage.js",
     "./package.json": "./package.json"
   },
   "engines": {
@@ -19,10 +24,16 @@
   },
   "scripts": {
     "test": "node tests/run-tests.mjs",
+    "test:v1.1": "node tests/v1.1.test.mjs",
     "test:contract": "node tests/plugin-contract.test.mjs",
     "test:discovery": "node tests/discovery.test.mjs",
-    "test:all": "node tests/run-tests.mjs && node tests/plugin-contract.test.mjs && node tests/discovery.test.mjs",
+    "test:all": "node tests/run-tests.mjs && node tests/v1.1.test.mjs && node tests/plugin-contract.test.mjs && node tests/discovery.test.mjs && node tests/check-yaml.mjs && node tests/check-report-consistency.mjs && node tests/check-sample-reproducible.mjs",
+    "check:reports": "node tests/check-report-consistency.mjs",
+    "check:sample": "node tests/check-sample-reproducible.mjs",
+    "check:yaml": "node tests/check-yaml.mjs",
+    "audit": "node tests/audit-samples.mjs",
     "fixtures": "python tests/make_fixtures.py",
+    "sample": "node tests/make-sample-run.mjs",
     "cli": "node cli.js",
     "notes": "node cli.js"
   },
@@ -34,6 +45,8 @@
     "lib/parse/*.py",
     "locale/*.json",
     "docs/**/*.md",
+    "docs/sample-run/**/*",
+    "!docs/references/authored-chapter-real-coursework.md",
     "README.md",
     "LICENSE"
   ],

@@ -1,16 +1,39 @@
 {
  "pipeline": "CourseNotes",
- "version": "1.0.0",
- "runId": "run-20261013-142142",
- "startedAt": "2026-10-13T14:21:42.351Z",
- "cwd": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes",
- "outputDir": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\docs\\sample-run",
- "workDir": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\docs\\sample-run\\.coursenotes\\run-20261013-142142",
+ "version": "1.1.0",
+ "runId": "run-20260101-000000",
+ "startedAt": "2026-01-01T00:00:00.000Z",
+ "cwd": "<repo>",
+ "outputDir": "<sample-run>",
+ "workDir": "<sample-run>\\.coursenotes\\run-20260101-000000",
+ "workspaceKind": "node",
+ "sandboxed": false,
+ "requestedStages": [
+  "scan",
+  "parse",
+  "knowledge",
+  "retrieve",
+  "generate",
+  "check",
+  "output"
+ ],
+ "executedStages": [
+  "scan",
+  "parse",
+  "knowledge",
+  "retrieve",
+  "generate",
+  "check",
+  "output"
+ ],
+ "completion": "scaffold_created",
+ "completionReason": "mode=scaffold：只生成骨架与简报，正文由调用方（Agent/人工）撰写。",
  "options": {
-  "outputDir": "docs\\sample-run",
+  "outputDir": "<sample-run>",
   "workDir": "",
   "language": "bilingual",
   "detailLevel": "comprehensive",
+  "mode": "scaffold",
   "enableWebSearch": false,
   "maxSearches": 12,
   "maxFetches": 8,
@@ -29,12 +52,23 @@
   "extraSearchKeywords": [],
   "chapterHeadingLevel": 1,
   "parserScript": "",
-  "logLevel": "info"
+  "logLevel": "warn",
+  "chunkChars": 0,
+  "maxPointsPerChunk": 12,
+  "chunkStrategy": "balanced",
+  "llmMaxAttempts": 3,
+  "llmRetryBackoffMs": 400,
+  "llmProvider": "",
+  "llmModel": "",
+  "maxHarnessAssetBytes": 67108864,
+  "evidencePerPoint": 4,
+  "evidenceCharBudget": 24000,
+  "evidenceExcerptChars": 900
  },
  "stages": {
   "scan": {
    "roots": [
-    "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\tests\\fixtures"
+    "<fixtures>"
    ],
    "totalFiles": 5,
    "parseable": 5,
@@ -46,10 +80,10 @@
   "parse": {
    "runtime": {
     "available": true,
-    "interpreter": "C:\\Users\\10679\\.dsh\\dsh-runtimes\\dsh-primary-runtime\\dependencies\\python\\python.exe",
+    "interpreter": "<python>",
     "pythonVersion": "3.12.14",
-    "script": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\lib\\parse\\course_notes_parser.py",
-    "elapsedMs": 342,
+    "script": "<repo>\\lib\\parse\\course_notes_parser.py",
+    "elapsedMs": 0,
     "exitCode": 0,
     "timedOut": false
    },
@@ -93,11 +127,40 @@
    "formulas": 4,
    "dependencies": 0
   },
+  "evidence": {
+   "points": 21,
+   "pointsWithEvidence": 0,
+   "pointsWithLectureOnly": 21,
+   "externalChars": 0,
+   "evidenceItems": 0,
+   "allowlistedUrls": 0,
+   "retrievedAt": "2026-01-01T00:00:00.000Z",
+   "limits": {
+    "excerptChars": 900,
+    "lectureChars": 900,
+    "perPoint": 4,
+    "totalChars": 24000,
+    "retrievedAt": "2026-01-01T00:00:00.000Z"
+   }
+  },
+  "vision": {
+   "total": 3,
+   "dropped": 0,
+   "byKind": {
+    "screenshot": 2,
+    "generic": 1
+   },
+   "withImage": 3,
+   "attachedToPoints": 2
+  },
   "coverage": {
    "summary": "覆盖率 0.0%（已覆盖 0/21，部分覆盖 0，未覆盖 21，结构小节 21/21，剩余 TODO 110）",
    "ratio": 0,
    "missing": 21,
    "partial": 0
+  },
+  "quality": {
+   "summary": "多维质量：结构 21/21，内容 0/21，双语 0/21，公式解释 1/4，引用异常 n/a，全维度通过 0/21"
   }
  },
  "documents": [
@@ -262,6 +325,8 @@
   "glossary": 9
  },
  "retrieval": {
+  "configured": false,
+  "serviceAvailable": false,
   "enabled": false,
   "performed": false,
   "reason": "disabled-by-config",
@@ -274,6 +339,101 @@
   "errorCount": 0,
   "errors": [],
   "sources": []
+ },
+ "evidence": {
+  "points": 21,
+  "pointsWithEvidence": 0,
+  "pointsWithLectureOnly": 21,
+  "externalChars": 0,
+  "evidenceItems": 0,
+  "allowlistedUrls": 0,
+  "retrievedAt": "2026-01-01T00:00:00.000Z",
+  "limits": {
+   "excerptChars": 900,
+   "lectureChars": 900,
+   "perPoint": 4,
+   "totalChars": 24000,
+   "retrievedAt": "2026-01-01T00:00:00.000Z"
+  }
+ },
+ "vision": {
+  "stats": {
+   "total": 3,
+   "dropped": 0,
+   "byKind": {
+    "screenshot": 2,
+    "generic": 1
+   },
+   "withImage": 3,
+   "attachedToPoints": 2
+  },
+  "capability": {
+   "supported": false,
+   "reason": "no provider/model is resolvable for this session",
+   "modalities": null
+  },
+  "summary": "视觉任务 / vision tasks: 3 个（已解读 0，待处理 3）；模型不支持图像输入 / the model is text-only（no provider/model is resolvable for this session）。未解读的图表在笔记中明确标注，不会被当作已完成。Un-interpreted figures are marked explicitly, never presented as done.",
+  "tasks": [
+   {
+    "id": "V001",
+    "kind": "screenshot",
+    "label": "课件截图 / slide screenshot",
+    "image": "assets/fixture-chart_f2c778263b.png",
+    "locator": "image file",
+    "sourceName": "fixture_chart.png",
+    "pointIds": [],
+    "status": "pending"
+   },
+   {
+    "id": "V002",
+    "kind": "screenshot",
+    "label": "课件截图 / slide screenshot",
+    "image": "assets/fixture-lecture_f2c778263b.png",
+    "locator": "slide 3",
+    "sourceName": "fixture_lecture.pptx",
+    "pointIds": [
+     "K004"
+    ],
+    "status": "pending"
+   },
+   {
+    "id": "V003",
+    "kind": "generic",
+    "label": "图表 / figure",
+    "image": "assets/fixture-outline_f2c778263b.png",
+    "locator": "paragraph 9",
+    "sourceName": "fixture_outline.docx",
+    "pointIds": [
+     "K008",
+     "K009",
+     "K010",
+     "K011",
+     "K012"
+    ],
+    "status": "pending"
+   }
+  ],
+  "applied": {
+   "count": 0,
+   "unknown": [],
+   "unresolved": 0
+  },
+  "pointsWithInterpretation": 0,
+  "resultsFile": ".coursenotes/vision-results.json"
+ },
+ "authoring": {
+  "attempted": false,
+  "skippedReason": "mode=scaffold：只生成骨架与简报，正文由调用方（Agent/人工）撰写。",
+  "authoredPointCount": 0,
+  "totalPoints": 21,
+  "pointIdsNotAuthored": [],
+  "metrics": null,
+  "chunks": [],
+  "failures": [],
+  "citations": {
+   "checkable": false,
+   "unknown": []
+  }
  },
  "coverage": {
   "totalKeyPoints": 21,
@@ -333,6 +493,7 @@
      "locator": "slide 4",
      "documentName": "fixture_lecture.pptx",
      "score": 1,
+     "matchedBy": "tokens",
      "status": "covered"
     },
     {
@@ -340,6 +501,7 @@
      "locator": "slide 4",
      "documentName": "fixture_lecture.pptx",
      "score": 1,
+     "matchedBy": "tokens",
      "status": "covered"
     },
     {
@@ -347,6 +509,7 @@
      "locator": "paragraph 8",
      "documentName": "fixture_outline.docx",
      "score": 1,
+     "matchedBy": "tokens",
      "status": "covered"
     },
     {
@@ -354,6 +517,7 @@
      "locator": "line 14",
      "documentName": "fixture_ch3.md",
      "score": 1,
+     "matchedBy": "notation",
      "status": "covered"
     }
    ]
@@ -382,17 +546,309 @@
    "K021"
   ]
  },
+ "quality": {
+  "language": "bilingual",
+  "points": {
+   "total": 21,
+   "complete": 0,
+   "structureOk": 21,
+   "contentOk": 0,
+   "bilingualOk": 0
+  },
+  "structure": {
+   "keyPointsWithSections": 21,
+   "sectionRatio": 1,
+   "remainingTodoMarkers": 110
+  },
+  "content": {
+   "authoredPoints": 0,
+   "ratio": 0,
+   "averageAuthoredChars": 674
+  },
+  "bilingual": {
+   "required": true,
+   "pointsWithBoth": 0,
+   "ratio": 0,
+   "missingEnglish": [
+    "K004",
+    "K008",
+    "K009"
+   ],
+   "missingChinese": [
+    "K005",
+    "K006",
+    "K012",
+    "K016"
+   ]
+  },
+  "formulas": {
+   "total": 4,
+   "rendered": 1,
+   "explained": 1
+  },
+  "citations": {
+   "checkable": false,
+   "allowedUrls": 0,
+   "citedUrls": 0,
+   "unknown": []
+  },
+  "semantic": {
+   "judged": false,
+   "unverified": true,
+   "items": [],
+   "note": "未执行语义完整性检查 / semantic check not run."
+  },
+  "completeness": {
+   "ratio": 0,
+   "label": "all-dimensions-complete"
+  },
+  "incompletePoints": [
+   {
+    "id": "K001",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K002",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K003",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K004",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K005",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K006",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K007",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K008",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K009",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K010",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K011",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K012",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K013",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K014",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K015",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K016",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K017",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K018",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K019",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K020",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   },
+   {
+    "id": "K021",
+    "missing": [
+     "content",
+     "bilingual"
+    ]
+   }
+  ]
+ },
  "outputs": {
-  "files": [],
-  "brief": null,
+  "files": [
+   {
+    "path": "Chapter_01_第 2 讲 神经网络基础.md",
+    "ok": true,
+    "chars": 9752
+   },
+   {
+    "path": "Chapter_02_第一章 概述.md",
+    "ok": true,
+    "chars": 7753
+   },
+   {
+    "path": "Chapter_03_第三章 传输层 Transport Layer.md",
+    "ok": true,
+    "chars": 6410
+   },
+   {
+    "path": "Chapter_04_fixture_lab.md",
+    "ok": true,
+    "chars": 4936
+   },
+   {
+    "path": "README.md",
+    "ok": true,
+    "chars": 2221
+   },
+   {
+    "path": "knowledge.json",
+    "ok": true,
+    "chars": 23516
+   },
+   {
+    "path": "run-report.md",
+    "ok": true,
+    "chars": 3817
+   },
+   {
+    "path": ".coursenotes/note-brief.md",
+    "ok": true,
+    "chars": 6076
+   },
+   {
+    "path": ".coursenotes/evidence.json",
+    "ok": true,
+    "chars": 6810
+   },
+   {
+    "path": ".coursenotes/vision-results.json",
+    "ok": true,
+    "chars": 1130
+   },
+   {
+    "path": "coverage-report.md",
+    "ok": true,
+    "chars": 5736
+   }
+  ],
+  "noteFiles": [
+   "Chapter_01_第 2 讲 神经网络基础.md",
+   "Chapter_02_第一章 概述.md",
+   "Chapter_03_第三章 传输层 Transport Layer.md",
+   "Chapter_04_fixture_lab.md"
+  ],
+  "writtenNoteFiles": [
+   "Chapter_01_第 2 讲 神经网络基础.md",
+   "Chapter_02_第一章 概述.md",
+   "Chapter_03_第三章 传输层 Transport Layer.md",
+   "Chapter_04_fixture_lab.md",
+   "README.md",
+   "run-report.md",
+   "coverage-report.md"
+  ],
+  "refusedNoteFiles": [],
+  "brief": "<sample-run>\\.coursenotes\\run-20260101-000000\\note-brief.md",
+  "artifacts": {
+   "knowledgeJson": "knowledge.json",
+   "runReport": "run-report.json",
+   "coverageReport": "coverage-report.md",
+   "evidence": ".coursenotes/evidence.json",
+   "visionTasks": ".coursenotes/vision-results.json"
+  },
   "assets": {
-   "dir": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\docs\\sample-run\\assets",
    "copied": 3,
-   "failures": []
+   "failures": [],
+   "dir": "<sample-run>\\assets",
+   "skipped": false
   }
  },
  "errors": [],
- "warnings": [],
+ "warnings": [
+  {
+   "stage": "author",
+   "code": "authoring-disabled-by-mode",
+   "message": "mode=scaffold：只生成骨架与简报，正文由调用方（Agent/人工）撰写。"
+  }
+ ],
  "limitations": [
   "外部检索未执行：配置中已关闭（enableWebSearch=false）。"
  ],
@@ -404,47 +860,57 @@
   {
    "path": "Chapter_01_第 2 讲 神经网络基础.md",
    "ok": true,
-   "chars": 8551
+   "chars": 9752
   },
   {
    "path": "Chapter_02_第一章 概述.md",
    "ok": true,
-   "chars": 6595
+   "chars": 7753
   },
   {
    "path": "Chapter_03_第三章 传输层 Transport Layer.md",
    "ok": true,
-   "chars": 5769
+   "chars": 6410
   },
   {
    "path": "Chapter_04_fixture_lab.md",
    "ok": true,
-   "chars": 4426
+   "chars": 4936
   },
   {
    "path": "README.md",
    "ok": true,
-   "chars": 1922
+   "chars": 2221
   },
   {
    "path": "knowledge.json",
    "ok": true,
-   "chars": 27758
+   "chars": 23516
   },
   {
    "path": "run-report.md",
    "ok": true,
-   "chars": 2282
+   "chars": 3817
   },
   {
    "path": ".coursenotes/note-brief.md",
    "ok": true,
-   "chars": 6069
+   "chars": 6076
+  },
+  {
+   "path": ".coursenotes/evidence.json",
+   "ok": true,
+   "chars": 6810
+  },
+  {
+   "path": ".coursenotes/vision-results.json",
+   "ok": true,
+   "chars": 1130
   },
   {
    "path": "coverage-report.md",
    "ok": true,
-   "chars": 4535
+   "chars": 5736
   }
  ],
  "noteFiles": [

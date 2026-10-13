@@ -1,0 +1,40 @@
+{
+ "results": [],
+ "pending": [
+  {
+   "taskId": "V001",
+   "kind": "screenshot",
+   "image": "assets/fixture-chart_f2c778263b.png",
+   "locator": "image file",
+   "sourceName": "fixture_chart.png",
+   "question": "Transcribe any text and formulas exactly, marking anything illegible rather than guessing it, then state what the slide is teaching.",
+   "pointIds": []
+  },
+  {
+   "taskId": "V002",
+   "kind": "screenshot",
+   "image": "assets/fixture-lecture_f2c778263b.png",
+   "locator": "slide 3",
+   "sourceName": "fixture_lecture.pptx",
+   "question": "Transcribe any text and formulas exactly, marking anything illegible rather than guessing it, then state what the slide is teaching.",
+   "pointIds": [
+    "K004"
+   ]
+  },
+  {
+   "taskId": "V003",
+   "kind": "generic",
+   "image": "assets/fixture-outline_f2c778263b.png",
+   "locator": "paragraph 9",
+   "sourceName": "fixture_outline.docx",
+   "question": "Explain the knowledge the figure encodes (its structure, flow, axes or steps) rather than relabelling the text inside it.",
+   "pointIds": [
+    "K008",
+    "K009",
+    "K010",
+    "K011",
+    "K012"
+   ]
+  }
+ ]
+}

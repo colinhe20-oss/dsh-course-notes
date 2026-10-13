@@ -3,11 +3,18 @@
 // DSH_* into shell tool calls, not into its own environment, so a plugin that
 // only looked at `process.env.DSH_HOME` would never find the bundled Python.
 //
+// The child is started with `stdio: 'inherit'` rather than a captured pipe: the
+// DSH sandbox forbids creating the pipes a captured child needs, and a probe that
+// captures its own child's output would fail with EPERM *inside the sandbox it is
+// meant to validate*.  The child therefore prints for itself and reports through
+// its exit code.
+//
 // Run: node tests/discovery.test.mjs
 
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -50,12 +57,25 @@ const lines = [
   'process.exit(resolved.ok ? 0 : 1);',
 ];
 
-const result = spawnSync(process.execPath, ['--input-type=module', '-e', lines.join('\n')], {
-  cwd: PLUGIN_DIR,
-  env,
-  encoding: 'utf8',
-});
-
-process.stdout.write(result.stdout ?? '');
-if (result.stderr) process.stderr.write(result.stderr);
+const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'course-notes-discovery-'));
+const scriptFile = path.join(scratch, 'probe.mjs');
+fs.writeFileSync(scriptFile, lines.join('\n'), 'utf8');
+let result;
+try {
+  result = spawnSync(process.execPath, [scriptFile], {
+    cwd: PLUGIN_DIR,
+    env,
+    stdio: ['ignore', 'inherit', 'inherit'],
+  });
+} finally {
+  try {
+    fs.rmSync(scratch, { recursive: true, force: true });
+  } catch {
+    /* best-effort scratch cleanup */
+  }
+}
+if (result.error) {
+  console.error(`discovery probe could not start: ${result.error.code ?? ''} ${result.error.message}`);
+  process.exit(1);
+}
 process.exit(result.status ?? 1);

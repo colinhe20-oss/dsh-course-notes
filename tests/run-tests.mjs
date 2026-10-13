@@ -752,15 +752,38 @@ await test('tokenize handles CJK bigrams and latin words', () => {
   assert.ok(tokens.has('descent'));
 });
 
-await test('the shipped authored sample reports its chapter as covered', () => {
+await test('the shipped authored chapter reference reports its chapter as covered', () => {
+  /*
+   * The *runnable* sample (`docs/sample-run`) is a scaffold run and is expected to
+   * score zero: it demonstrates the structure and the explicit
+   * `scaffold_created` state.  The "what a finished chapter looks like"
+   * reference lives in `docs/references/`, and this test proves the coverage
+   * checker recognises authored prose — the property the scaffold sample cannot
+   * demonstrate by construction.
+   */
   const sampleDir = path.join(ROOT, 'docs', 'sample-run');
-  if (!fs.existsSync(path.join(sampleDir, 'knowledge.json'))) {
+  const authoredChapterPath = path.join(
+    ROOT,
+    'docs',
+    'references',
+    'authored-chapter-example.md',
+  );
+  if (!fs.existsSync(path.join(sampleDir, 'knowledge.json')) || !fs.existsSync(authoredChapterPath)) {
     // The sample is a deliverable, not a build artefact; skip when absent.
-    process.stdout.write('       (sample run not present, skipped)\n');
+    process.stdout.write('       (authored reference not present, skipped)\n');
     return;
   }
   const knowledge = JSON.parse(fs.readFileSync(path.join(sampleDir, 'knowledge.json'), 'utf8'));
-  const notes = loadNoteTexts(sampleDir);
+  const chapter1 = knowledge.chapters.find((chapter) => chapter.index === 1);
+  const notes = [
+    {
+      path: authoredChapterPath,
+      name: path.basename(authoredChapterPath),
+      chapterKey: 'Chapter_01',
+      text: fs.readFileSync(authoredChapterPath, 'utf8'),
+    },
+    ...loadNoteTexts(sampleDir).filter((note) => note.chapterKey !== 'Chapter_01'),
+  ];
   assert.ok(notes.length >= 4, `expected the sample notes, found ${notes.length}`);
   const points = knowledge.chapters.flatMap((chapter) =>
     (chapter.points ?? []).map((point) => ({
@@ -781,17 +804,18 @@ await test('the shipped authored sample reports its chapter as covered', () => {
     `the authored chapter must be fully covered (got ${authoredChapter.covered}/${authoredChapter.total})`,
   );
   assert.ok(
-    coverage.byChapter.slice(1).every((chapter) => chapter.covered === 0),
-    'the untouched chapters must still count as uncovered',
+    coverage.byChapter.filter((chapter) => chapter.chapterIndex !== 1).every((chapter) => chapter.covered === 0),
+    'the scaffold-only chapters must still count as uncovered',
   );
   assert.equal(coverage.scaffolding.sectionRatio, 1, 'every knowledge point has its own section');
-  assert.ok(coverage.ratio > 0 && coverage.ratio < 1, 'the sample demonstrates partial coverage');
-  const authoredText = fs.readFileSync(
-    path.join(sampleDir, 'Chapter_01_第 2 讲 神经网络基础.md'),
-    'utf8',
-  );
+  assert.ok(coverage.ratio > 0 && coverage.ratio < 1, 'the reference demonstrates partial coverage');
+  const authoredText = notes[0].text;
   assert.ok(!authoredText.includes(TODO_MARKER), 'the authored chapter has no remaining placeholders');
-  assert.equal((authoredText.match(/COURSENOTES:POINT K\d+ START/g) ?? []).length, 7);
+  assert.equal(
+    (authoredText.match(/COURSENOTES:POINT K\d+ START/g) ?? []).length,
+    chapter1.points.length,
+    'the authored chapter carries one section per chapter-1 knowledge point',
+  );
 });
 
 /* ------------------------------------------------------------------ group 7 */

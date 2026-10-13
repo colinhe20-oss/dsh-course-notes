@@ -1,6 +1,6 @@
 # 知识点覆盖率报告 / Knowledge Coverage Report
 
-生成时间 / Generated at: 2026-10-13T14:21:43.147Z
+生成时间 / Generated at: 2026-01-01T00:00:00.000Z
 
 > 覆盖率只反映“提取到的知识点是否在笔记中出现”，**不代表讲解的正确性**。
 > Coverage only reports whether extracted knowledge points appear in the notes;
@@ -9,16 +9,16 @@
 ## 汇总 / Summary
 
 - 提取知识点 / Extracted knowledge points: **21**
-- 已覆盖 / Covered: **7**
+- 已覆盖 / Covered: **0**
 - 部分覆盖 / Partially covered: **0**
-- 未覆盖 / Not covered: **14**
-- 覆盖率 / Coverage ratio: **33.3%**（加权：33.3%）
+- 未覆盖 / Not covered: **21**
+- 覆盖率 / Coverage ratio: **0.0%**（加权：0.0%）
 - 判定阈值 / Thresholds: covered ≥ 0.55, partial ≥ 0.25
 
 ### 结构完整度 vs 内容完整度 / Scaffold vs authored content
 
 - 已生成小节的知识点 / key points that have their own section: **21/21**（100.0%）
-- 尚未由模型撰写的位置 / remaining authoring markers (`COURSENOTES:TODO`): **74**
+- 尚未由模型撰写的位置 / remaining authoring markers (`COURSENOTES:TODO`): **110**
 
 > ⚠ 笔记骨架已完整生成，但讲解正文尚未撰写。上面的“覆盖率”衡量的是**正文内容**是否覆盖知识点，因此此时偏低是预期结果：请先按 `note-brief.md` 补全全部 TODO，再重新运行本检查。
 > The note skeleton is complete but the explanatory prose has not been written yet. The coverage
@@ -35,7 +35,7 @@
 
 | 章 / Chapter | 知识点 | 已覆盖 | 部分 | 未覆盖 | 覆盖率 |
 | --- | --- | --- | --- | --- | --- |
-| 第 1 章 第 2 讲 神经网络基础 | 7 | 7 | 0 | 0 | 100.0% |
+| 第 1 章 第 2 讲 神经网络基础 | 7 | 0 | 0 | 7 | 0.0% |
 | 第 2 章 第一章 概述 | 5 | 0 | 0 | 5 | 0.0% |
 | 第 3 章 第三章 传输层 / Transport Layer | 5 | 0 | 0 | 5 | 0.0% |
 | 第 4 章 fixture_lab | 4 | 0 | 0 | 4 | 0.0% |
@@ -59,6 +59,13 @@
 
 | ID | 章 | 知识点 | 来源 | 匹配度 |
 | --- | --- | --- | --- | --- |
+| K001 | 1 | Neural Network Basics / 优化与反向传播 | fixture_lecture.pptx · slide 1 | 0.24 |
+| K002 | 1 | 梯度下降（Gradient Descent, GD）沿负梯度方向更新参数 | fixture_lecture.pptx · slide 2 | 0.24 |
+| K003 | 1 | 强调学习率对收敛性的影响。 | fixture_lecture.pptx · slide 2 notes | 0.24 |
+| K004 | 1 | 表格：优化器 / 更新依据 / 典型学习率 | fixture_lecture.pptx · slide 3 | 0.24 |
+| K005 | 1 | 链式法则：dL/dW = dL/dy * dy/dz * dz/dW | fixture_lecture.pptx · slide 4 | 0.24 |
+| K006 | 1 | 其中 z = Wx + b，y = sigma(z)，sigma 为激活函数 | fixture_lecture.pptx · slide 4 | 0.24 |
+| K007 | 1 | 雅可比矩阵维度：dL/dz 为 (n,1)，dz/dW 为 (n,m) | fixture_lecture.pptx · slide 4 | 0.24 |
 | K008 | 2 | 计算机网络（Computer Network）将地理位置不同的计算机互联，实现资源共享与信息传递。 | fixture_outline.docx · paragraph 2 | 0.24 |
 | K009 | 2 | OSI 七层模型：物理层（Physical Layer）、数据链路层（Data Link Layer, DLL）、网… | fixture_outline.docx · paragraph 4 | 0.24 |
 | K010 | 2 | 网络层 PDU 称为分组（packet），传输层 PDU 称为报文段（segment）。 | fixture_outline.docx · paragraph 5 | 0.24 |
@@ -78,11 +85,39 @@
 
 ## 笔记文件 / Note files
 
-- Chapter_01_第 2 讲 神经网络基础.md（60790 字符）
-- Chapter_02_第一章 概述.md（6595 字符）
-- Chapter_03_第三章 传输层 Transport Layer.md（5769 字符）
-- Chapter_04_fixture_lab.md（4426 字符）
+- Chapter_01_第 2 讲 神经网络基础.md（9752 字符）
+- Chapter_02_第一章 概述.md（7753 字符）
+- Chapter_03_第三章 传输层 Transport Layer.md（6410 字符）
+- Chapter_04_fixture_lab.md（4936 字符）
 
 ## 覆盖方法说明 / Method note
 
 匹配使用 CJK 二元组与英文词的词元重合度，并优先采信标题原样出现。因此“改写但等义”的讲解可能被判为部分覆盖，属于保守估计。该指标仅用于内部完整性核查。
+
+## 多维质量检查 / Multi-dimensional quality check
+
+> 这些指标全部基于**笔记文本本身**，不判断讲解是否数学上正确；覆盖率与质量分都不能当作“内容正确”的证明。
+> Every number below is measured from the note text. None of them is evidence that an explanation is correct.
+
+| 维度 / Dimension | 结果 | 说明 |
+| --- | --- | --- |
+| 结构覆盖率 / Structure | 21/21（100.0%） | 每个知识点是否有独立小节 |
+| 内容覆盖率 / Content | 0/21（0.0%） | 小节内是否有实质正文（平均 674 字） |
+| 双语完整率 / Bilingual | 0/21（0.0%） | 中英文讲解是否都达到最低篇幅 |
+| 公式覆盖率 / Formula | 1/4 渲染，1 已解释 | 公式是否出现在笔记中且有上下文说明 |
+| 引用有效性 / Citation | 未执行检索，无法核对（不表示 0 条错误） | 引用 URL 是否来自真实检索结果 |
+| 全部维度通过 / All dimensions | 0/21（0.0%） | 该数字才是“这篇笔记写完了”的保守指标 |
+
+- 语义检查：未执行（需要有模型可用时才运行）。
+
+- 缺少英文讲解的知识点 / missing English section: K004, K008, K009
+- 缺少中文讲解的知识点 / missing Chinese section: K005, K006, K012, K016
+
+### 公式逐条状态 / Formula status
+
+| 公式 | 来源 | 渲染 | 解释 |
+| --- | --- | --- | --- |
+| `链式法则：dL/dW = dL/dy * dy/dz * dz/dW` | fixture_lecture.pptx · slide 4 | ❌ | — |
+| `其中 z = Wx + b，y = sigma(z)，sigma 为激活函数` | fixture_lecture.pptx · slide 4 | ❌ | — |
+| `信道容量遵循香农公式 C = B * log2(1 + S/N)，其中 B 为带宽，S/N 为信噪比。` | fixture_outline.docx · paragraph 8 | ❌ | — |
+| `U = \frac{T_{transmit}}{T_{transmit} + 2 \cdot T_{prop}}` | fixture_ch3.md · line 14 | ✅ | ✅ |
