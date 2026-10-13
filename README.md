@@ -3,6 +3,9 @@
 **课程资料 → 结构清晰、知识完整、可溯源的学习笔记，直接跑在 DeepSeek Harness 里。**
 **Turn course materials into structured, knowledge-complete, source-traceable study notes — inside DeepSeek Harness.**
 
+> 📖 **本 README 为中英对照**：每个小节都同时给出中文与 English（标题、表格、正文并列），无需切换文件。
+> **This README is bilingual throughout** — every section carries both Chinese and English, in paired headings, tables and paragraphs. No separate language file to switch to.
+
 CourseNotes 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）的原生 Cordis 插件。把课件文件夹（或若干文件）与一个输出目录交给它，它会走完整条流水线；笔记里每个知识点都能追回到课件的具体页码 / 幻灯片号 / 段落号。
 
 CourseNotes is a native Cordis plugin for DeepSeek Harness. Point it at a folder of course material and an output directory and it runs the whole pipeline; every knowledge point stays traceable to the page, slide or paragraph it came from.
