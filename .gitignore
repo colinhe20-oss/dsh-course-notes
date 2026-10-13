@@ -4,6 +4,11 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 
+# meow-memory: the session memory database lives in a hidden workspace directory.
+# Deleting it is unrecoverable (no recycle bin, not in git), so it is ignored
+# rather than committed, and kept locally for `memory_home` backups.
+.dsh-meow/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -17,19 +22,24 @@ env/
 tests/.work/
 tests/fixtures/
 
-# Intermediate pipeline artefacts (documents.json, note-brief.md, rendered
-# pages, per-run knowledge.json …).  The final notes, coverage report and run
-# report ARE tracked, so the samples stay readable without shipping megabytes
-# of stage dumps.
+# Intermediate pipeline artefacts (documents.json, per-run run.json, rendered
+# pages, per-run knowledge.json …).  The final notes, coverage report, run report
+# and the *published* evidence/vision sidecars ARE tracked, so the samples stay
+# readable without shipping megabytes of stage dumps.
 .coursenotes/
+
+# …except the per-run scratch tree inside a tracked sample, whose contents are
+# a copy of what the sample already publishes at its top level.
+!docs/sample-run/.coursenotes/
+docs/sample-run/.coursenotes/run-*/
 
 # Runs produced by using the plugin inside this checkout.
 /course-notes-output/
 /notes/
 
 # Sample generated from real coursework (contains the author's own homework
-# text).  Kept locally for reference, deliberately not published.  The tracked
-# sample under docs/sample-run/ is built from the synthetic test fixtures.
+# text).  Kept locally for reference, deliberately not published; the curated
+# excerpts that ARE published live under docs/references/.
 docs/sample-run-real-pdf/
 
 # Editor / OS
