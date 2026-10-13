@@ -1,0 +1,21 @@
+# CourseNotes bundle patch.
+#
+# Inserts the plugin row into the profile's Cordis tree.  The row deliberately
+# carries no `config`: every option has a default in `lib/config.js`, and the
+# Loader replaces `config` wholesale rather than deep-merging it — so keeping
+# defaults in exactly one place means a user tuning one value in their own
+# `cordis.patch.yml` cannot accidentally lose the other defaults.
+#
+# To override anything, add this to the profile's `cordis.patch.yml` (a
+# higher-priority layer than this bundle patch):
+#
+#   - id: course-notes
+#     name: course-notes
+#     config:
+#       outputDir: 'D:\notes'
+#       language: bilingual
+#       maxSearches: 16
+#
+- insert:
+    - id: course-notes
+      name: 'course-notes'

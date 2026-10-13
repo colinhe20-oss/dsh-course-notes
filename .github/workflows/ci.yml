@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ['22.x', '24.x']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install parsing backend
+        run: python -m pip install --upgrade pip pymupdf python-pptx python-docx Pillow
+
+      - name: Check syntax
+        run: |
+          node --check index.js
+          node --check cli.js
+          for file in lib/*.js; do node --check "$file"; done
+
+      - name: Generate fixtures
+        run: python tests/make_fixtures.py
+
+      - name: Unit and end-to-end tests
+        run: node tests/run-tests.mjs
+
+      - name: Plugin contract tests
+        run: node tests/plugin-contract.test.mjs
+
+      - name: Interpreter discovery without DSH_* environment
+        run: node tests/discovery.test.mjs
+
+      - name: Offline CLI smoke test
+        run: node cli.js --probe

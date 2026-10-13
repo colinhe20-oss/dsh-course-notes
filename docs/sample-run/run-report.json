@@ -1,0 +1,474 @@
+{
+ "pipeline": "CourseNotes",
+ "version": "1.0.0",
+ "runId": "run-20261013-142142",
+ "startedAt": "2026-10-13T14:21:42.351Z",
+ "cwd": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes",
+ "outputDir": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\docs\\sample-run",
+ "workDir": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\docs\\sample-run\\.coursenotes\\run-20261013-142142",
+ "options": {
+  "outputDir": "docs\\sample-run",
+  "workDir": "",
+  "language": "bilingual",
+  "detailLevel": "comprehensive",
+  "enableWebSearch": false,
+  "maxSearches": 12,
+  "maxFetches": 8,
+  "enableOcr": true,
+  "ocrCommand": "",
+  "includeExamples": true,
+  "includeExercises": true,
+  "splitByChapter": true,
+  "coverageCheck": true,
+  "fileOrder": "natural",
+  "explicitOrder": [],
+  "maxUnitChars": 4000,
+  "briefCharBudget": 60000,
+  "maxFileBytes": 209715200,
+  "pythonPath": "",
+  "extraSearchKeywords": [],
+  "chapterHeadingLevel": 1,
+  "parserScript": "",
+  "logLevel": "info"
+ },
+ "stages": {
+  "scan": {
+   "roots": [
+    "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\tests\\fixtures"
+   ],
+   "totalFiles": 5,
+   "parseable": 5,
+   "unsupported": 0,
+   "skipped": 0,
+   "errors": [],
+   "listing": "输入位置 1 个 / input roots: 1\n  [OK] fixture_ch3.md — Markdown, 551 B\n  [OK] fixture_chart.png — image, 4.5 KiB\n  [OK] fixture_lab.txt — plain text, 235 B\n  [OK] fixture_lecture.pptx — PowerPoint (OOXML), 39.9 KiB\n  [OK] fixture_outline.docx — Word (OOXML), 40.9 KiB"
+  },
+  "parse": {
+   "runtime": {
+    "available": true,
+    "interpreter": "C:\\Users\\10679\\.dsh\\dsh-runtimes\\dsh-primary-runtime\\dependencies\\python\\python.exe",
+    "pythonVersion": "3.12.14",
+    "script": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\lib\\parse\\course_notes_parser.py",
+    "elapsedMs": 342,
+    "exitCode": 0,
+    "timedOut": false
+   },
+   "summary": {
+    "documentCount": 5,
+    "parsedCount": 5,
+    "failedCount": 0,
+    "charCount": 979,
+    "unitCount": 36,
+    "tableCount": 3,
+    "imageCount": 3,
+    "formulaCount": 4,
+    "visionTaskCount": 3,
+    "warningCount": 0,
+    "genres": {
+     "notes": 2,
+     "lecture": 2,
+     "lab": 1
+    },
+    "formats": {
+     "image": 1,
+     "pptx": 1,
+     "docx": 1,
+     "markdown": 1,
+     "text": 1
+    },
+    "scripts": {
+     "cjk": 4,
+     "latin": 0,
+     "mixed": 0,
+     "unknown": 1
+    }
+   },
+   "documents": 5,
+   "failed": 0
+  },
+  "knowledge": {
+   "chapters": 4,
+   "keyPoints": 21,
+   "glossary": 9,
+   "formulas": 4,
+   "dependencies": 0
+  },
+  "coverage": {
+   "summary": "覆盖率 0.0%（已覆盖 0/21，部分覆盖 0，未覆盖 21，结构小节 21/21，剩余 TODO 110）",
+   "ratio": 0,
+   "missing": 21,
+   "partial": 0
+  }
+ },
+ "documents": [
+  {
+   "id": "D01-fixture-chart",
+   "name": "fixture_chart.png",
+   "relative": "fixture_chart.png",
+   "format": "image",
+   "genre": "notes",
+   "supported": true,
+   "needsVision": true,
+   "stats": {
+    "unitCount": 0,
+    "headingCount": 0,
+    "tableCount": 0,
+    "imageCount": 1,
+    "formulaCount": 0,
+    "charCount": 0
+   },
+   "warnings": [],
+   "visionTaskCount": 1,
+   "images": [
+    {
+     "assetPath": "assets/fixture-chart_f2c778263b.png",
+     "locator": "image file",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "D02-fixture-lecture",
+   "name": "fixture_lecture.pptx",
+   "relative": "fixture_lecture.pptx",
+   "format": "pptx",
+   "genre": "lecture",
+   "supported": true,
+   "needsVision": false,
+   "stats": {
+    "unitCount": 14,
+    "headingCount": 7,
+    "tableCount": 1,
+    "imageCount": 1,
+    "formulaCount": 2,
+    "charCount": 340,
+    "pageCount": 4
+   },
+   "warnings": [],
+   "visionTaskCount": 1,
+   "images": [
+    {
+     "assetPath": "assets/fixture-lecture_f2c778263b.png",
+     "locator": "slide 3",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "D03-fixture-outline",
+   "name": "fixture_outline.docx",
+   "relative": "fixture_outline.docx",
+   "format": "docx",
+   "genre": "notes",
+   "supported": true,
+   "needsVision": false,
+   "stats": {
+    "unitCount": 9,
+    "headingCount": 4,
+    "tableCount": 1,
+    "imageCount": 1,
+    "formulaCount": 1,
+    "charCount": 287
+   },
+   "warnings": [],
+   "visionTaskCount": 1,
+   "images": [
+    {
+     "assetPath": "assets/fixture-outline_f2c778263b.png",
+     "locator": "paragraph 9",
+     "caption": ""
+    }
+   ]
+  },
+  {
+   "id": "D04-fixture-ch3",
+   "name": "fixture_ch3.md",
+   "relative": "fixture_ch3.md",
+   "format": "markdown",
+   "genre": "lecture",
+   "supported": true,
+   "needsVision": false,
+   "stats": {
+    "unitCount": 9,
+    "headingCount": 3,
+    "tableCount": 1,
+    "imageCount": 0,
+    "formulaCount": 1,
+    "charCount": 241
+   },
+   "warnings": [],
+   "visionTaskCount": 0,
+   "images": []
+  },
+  {
+   "id": "D05-fixture-lab",
+   "name": "fixture_lab.txt",
+   "relative": "fixture_lab.txt",
+   "format": "text",
+   "genre": "lab",
+   "supported": true,
+   "needsVision": false,
+   "stats": {
+    "unitCount": 4,
+    "headingCount": 0,
+    "tableCount": 0,
+    "imageCount": 0,
+    "formulaCount": 0,
+    "charCount": 111
+   },
+   "warnings": [],
+   "visionTaskCount": 0,
+   "images": []
+  }
+ ],
+ "knowledge": {
+  "counts": {
+   "chapters": 4,
+   "keyPoints": 21,
+   "glossary": 9,
+   "formulas": 4,
+   "dependencies": 0
+  },
+  "chapters": [
+   {
+    "index": 1,
+    "title": "第 2 讲 神经网络基础",
+    "points": 7,
+    "formulas": 2,
+    "figures": 1
+   },
+   {
+    "index": 2,
+    "title": "第一章 概述",
+    "points": 5,
+    "formulas": 1,
+    "figures": 1
+   },
+   {
+    "index": 3,
+    "title": "第三章 传输层 / Transport Layer",
+    "points": 5,
+    "formulas": 1,
+    "figures": 0
+   },
+   {
+    "index": 4,
+    "title": "fixture_lab",
+    "points": 4,
+    "formulas": 0,
+    "figures": 0
+   }
+  ],
+  "glossary": 9
+ },
+ "retrieval": {
+  "enabled": false,
+  "performed": false,
+  "reason": "disabled-by-config",
+  "summary": "外部检索未执行：配置中已关闭（enableWebSearch=false）。",
+  "planTotal": 0,
+  "queryCount": 0,
+  "resultCount": 0,
+  "fetchCount": 0,
+  "sourceCount": 0,
+  "errorCount": 0,
+  "errors": [],
+  "sources": []
+ },
+ "coverage": {
+  "totalKeyPoints": 21,
+  "covered": 0,
+  "partial": 0,
+  "missing": 21,
+  "ratio": 0,
+  "effectiveRatio": 0,
+  "byChapter": [
+   {
+    "chapterIndex": 1,
+    "chapterTitle": "第 2 讲 神经网络基础",
+    "total": 7,
+    "covered": 0,
+    "partial": 0,
+    "missing": 7,
+    "ratio": 0
+   },
+   {
+    "chapterIndex": 2,
+    "chapterTitle": "第一章 概述",
+    "total": 5,
+    "covered": 0,
+    "partial": 0,
+    "missing": 5,
+    "ratio": 0
+   },
+   {
+    "chapterIndex": 3,
+    "chapterTitle": "第三章 传输层 / Transport Layer",
+    "total": 5,
+    "covered": 0,
+    "partial": 0,
+    "missing": 5,
+    "ratio": 0
+   },
+   {
+    "chapterIndex": 4,
+    "chapterTitle": "fixture_lab",
+    "total": 4,
+    "covered": 0,
+    "partial": 0,
+    "missing": 4,
+    "ratio": 0
+   }
+  ],
+  "glossaryPresent": 9,
+  "glossaryTotal": 9,
+  "formulas": {
+   "total": 4,
+   "covered": 4,
+   "partial": 0,
+   "missing": 0,
+   "items": [
+    {
+     "text": "链式法则：dL/dW = dL/dy * dy/dz * dz/dW",
+     "locator": "slide 4",
+     "documentName": "fixture_lecture.pptx",
+     "score": 1,
+     "status": "covered"
+    },
+    {
+     "text": "其中 z = Wx + b，y = sigma(z)，sigma 为激活函数",
+     "locator": "slide 4",
+     "documentName": "fixture_lecture.pptx",
+     "score": 1,
+     "status": "covered"
+    },
+    {
+     "text": "信道容量遵循香农公式 C = B * log2(1 + S/N)，其中 B 为带宽，S/N 为信噪比。",
+     "locator": "paragraph 8",
+     "documentName": "fixture_outline.docx",
+     "score": 1,
+     "status": "covered"
+    },
+    {
+     "text": "U = \\frac{T_{transmit}}{T_{transmit} + 2 \\cdot T_{prop}}",
+     "locator": "line 14",
+     "documentName": "fixture_ch3.md",
+     "score": 1,
+     "status": "covered"
+    }
+   ]
+  },
+  "missingPointIds": [
+   "K001",
+   "K002",
+   "K003",
+   "K004",
+   "K005",
+   "K006",
+   "K007",
+   "K008",
+   "K009",
+   "K010",
+   "K011",
+   "K012",
+   "K013",
+   "K014",
+   "K015",
+   "K016",
+   "K017",
+   "K018",
+   "K019",
+   "K020",
+   "K021"
+  ]
+ },
+ "outputs": {
+  "files": [],
+  "brief": null,
+  "assets": {
+   "dir": "C:\\Users\\10679\\Documents\\deepseek-harness\\plugins\\course-notes\\docs\\sample-run\\assets",
+   "copied": 3,
+   "failures": []
+  }
+ },
+ "errors": [],
+ "warnings": [],
+ "limitations": [
+  "外部检索未执行：配置中已关闭（enableWebSearch=false）。"
+ ],
+ "model": null,
+ "usedLlm": false,
+ "scanListing": "输入位置 1 个 / input roots: 1\n  [OK] fixture_ch3.md — Markdown, 551 B\n  [OK] fixture_chart.png — image, 4.5 KiB\n  [OK] fixture_lab.txt — plain text, 235 B\n  [OK] fixture_lecture.pptx — PowerPoint (OOXML), 39.9 KiB\n  [OK] fixture_outline.docx — Word (OOXML), 40.9 KiB",
+ "courseName": "fixture_outline",
+ "writtenFiles": [
+  {
+   "path": "Chapter_01_第 2 讲 神经网络基础.md",
+   "ok": true,
+   "chars": 8551
+  },
+  {
+   "path": "Chapter_02_第一章 概述.md",
+   "ok": true,
+   "chars": 6595
+  },
+  {
+   "path": "Chapter_03_第三章 传输层 Transport Layer.md",
+   "ok": true,
+   "chars": 5769
+  },
+  {
+   "path": "Chapter_04_fixture_lab.md",
+   "ok": true,
+   "chars": 4426
+  },
+  {
+   "path": "README.md",
+   "ok": true,
+   "chars": 1922
+  },
+  {
+   "path": "knowledge.json",
+   "ok": true,
+   "chars": 27758
+  },
+  {
+   "path": "run-report.md",
+   "ok": true,
+   "chars": 2282
+  },
+  {
+   "path": ".coursenotes/note-brief.md",
+   "ok": true,
+   "chars": 6069
+  },
+  {
+   "path": "coverage-report.md",
+   "ok": true,
+   "chars": 4535
+  }
+ ],
+ "noteFiles": [
+  "Chapter_01_第 2 讲 神经网络基础.md",
+  "Chapter_02_第一章 概述.md",
+  "Chapter_03_第三章 传输层 Transport Layer.md",
+  "Chapter_04_fixture_lab.md"
+ ],
+ "chapterFiles": [
+  {
+   "index": 1,
+   "file": "Chapter_01_第 2 讲 神经网络基础.md"
+  },
+  {
+   "index": 2,
+   "file": "Chapter_02_第一章 概述.md"
+  },
+  {
+   "index": 3,
+   "file": "Chapter_03_第三章 传输层 Transport Layer.md"
+  },
+  {
+   "index": 4,
+   "file": "Chapter_04_fixture_lab.md"
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Test scratch space: fixtures and per-run output are generated, not tracked.
+# The curated documentation samples under docs/ are tracked on purpose.
+tests/.work/
+tests/fixtures/
+
+# Intermediate pipeline artefacts (documents.json, note-brief.md, rendered
+# pages, per-run knowledge.json …).  The final notes, coverage report and run
+# report ARE tracked, so the samples stay readable without shipping megabytes
+# of stage dumps.
+.coursenotes/
+
+# Runs produced by using the plugin inside this checkout.
+/course-notes-output/
+/notes/
+
+# Sample generated from real coursework (contains the author's own homework
+# text).  Kept locally for reference, deliberately not published.  The tracked
+# sample under docs/sample-run/ is built from the synthetic test fixtures.
+docs/sample-run-real-pdf/
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*

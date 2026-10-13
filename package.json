@@ -1,0 +1,73 @@
+{
+  "name": "course-notes",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "CourseNotes — turn course materials (PDF/PPTX/DOCX/Markdown/text/images) into structured, source-traceable bilingual study notes inside DeepSeek Harness.",
+  "meta": {
+    "title": "CourseNotes 智能课程笔记",
+    "description": "从课件（PDF/PPT/Word/Markdown/图片）提取全部知识点，结合网络资料补充，生成中英双语、可溯源的结构化 Markdown 学习笔记。"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./cli": "./cli.js",
+    "./pipeline": "./lib/pipeline.js",
+    "./config": "./lib/config.js",
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "test": "node tests/run-tests.mjs",
+    "test:contract": "node tests/plugin-contract.test.mjs",
+    "test:discovery": "node tests/discovery.test.mjs",
+    "test:all": "node tests/run-tests.mjs && node tests/plugin-contract.test.mjs && node tests/discovery.test.mjs",
+    "fixtures": "python tests/make_fixtures.py",
+    "cli": "node cli.js",
+    "notes": "node cli.js"
+  },
+  "files": [
+    "index.js",
+    "cli.js",
+    "cordis.patch.yml",
+    "lib/**/*.js",
+    "lib/parse/*.py",
+    "locale/*.json",
+    "docs/**/*.md",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "cordis",
+    "cordis-plugin",
+    "course-notes",
+    "study-notes",
+    "lecture-notes",
+    "bilingual",
+    "pdf",
+    "pptx",
+    "docx",
+    "knowledge-points"
+  ],
+  "author": "colinhe06",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/colinhe06/dsh-course-notes.git"
+  },
+  "homepage": "https://github.com/colinhe06/dsh-course-notes#readme",
+  "bugs": {
+    "url": "https://github.com/colinhe06/dsh-course-notes/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

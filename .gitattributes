@@ -1,0 +1,24 @@
+# Normalise line endings for text, never touch binary fixtures.
+* text=auto eol=lf
+
+*.js    text eol=lf
+*.mjs   text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.md    text eol=lf
+*.py    text eol=lf
+*.txt   text eol=lf
+
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.pdf   binary
+*.pptx  binary
+*.docx  binary
+
+# Keep diffs readable on Windows too.
+*.ps1   text eol=crlf
+*.bat   text eol=crlf
