@@ -52,15 +52,15 @@
     "docx",
     "knowledge-points"
   ],
-  "author": "colinhe06",
+  "author": "colinhe20-oss",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/colinhe06/dsh-course-notes.git"
+    "url": "git+https://github.com/colinhe20-oss/dsh-course-notes.git"
   },
-  "homepage": "https://github.com/colinhe06/dsh-course-notes#readme",
+  "homepage": "https://github.com/colinhe20-oss/dsh-course-notes#readme",
   "bugs": {
-    "url": "https://github.com/colinhe06/dsh-course-notes/issues"
+    "url": "https://github.com/colinhe20-oss/dsh-course-notes/issues"
   },
   "publishConfig": {
     "access": "public"
