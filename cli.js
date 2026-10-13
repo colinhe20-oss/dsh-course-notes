@@ -9,16 +9,20 @@
  *   node cli.js --probe
  *   node cli.js "C:\课件" --out out --json run.json --no-web
  *
- * The offline runner has no `ctx.web`, so the retrieval stage reports itself as
- * not performed unless a search/fetch implementation is supplied through
- * `--web-endpoint` (an HTTP JSON endpoint) — see README "Offline mode".
+ * The offline runner has no `ctx.web` and no `ctx.llm`, so external retrieval and
+ * model authoring both report themselves as not performed rather than pretending.
+ * A retrieval provider can be supplied through `--web-endpoint` (an HTTP JSON
+ * endpoint) — see README "Offline mode".  Model authoring is Harness-only by
+ * design: the CLI's job is the deterministic half of the pipeline plus a
+ * `scaffold_created` run that an agent or a human finishes from the writing
+ * brief.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 
 import { normalizeConfig } from './lib/config.js';
-import { runPipeline } from './lib/pipeline.js';
+import { runPipeline, COMPLETION_STATES } from './lib/pipeline.js';
 import { createNodeWorkspace } from './lib/files.js';
 import { createLogger, toPosix } from './lib/util.js';
 import { resolvePython, pythonCapabilities, BACKEND_SCRIPT } from './lib/python-bridge.js';
@@ -35,17 +39,21 @@ const USAGE = `CourseNotes CLI
   --work <dir>           过程目录（默认 <out>/.coursenotes）
   --language <v>         bilingual | zh | en（默认 bilingual）
   --detail <v>           concise | standard | comprehensive（默认 comprehensive）
+  --mode <v>             auto | scaffold（离线 CLI 只支持 scaffold：没有 ctx.llm）
   --no-web               关闭外部检索
   --web-endpoint <url>   离线检索端点：POST {query} -> {sources:[{url,title,snippet}]}
   --ocr / --no-ocr       图片按视觉任务处理（默认 --ocr）
   --no-exercises         不生成自测题
   --no-examples          不生成示例小节
   --single-file          合并为单个 Markdown 而不是每章一个文件
-  --no-coverage          跳过覆盖率检查
+  --no-coverage          跳过覆盖率与质量检查
   --order <v>            natural | name | explicit | mtime
+  --stages <list>        只运行这些阶段（逗号分隔）：scan,parse,knowledge,retrieve,generate,check,output
   --python <path>        Python 解释器路径
   --max-searches <n>     最大检索查询数
   --max-fetches <n>      最大抓取页数
+  --chunk-chars <n>      单块提示词预算（0 = 由模型上下文推导；CLI 无模型时无效果）
+  --evidence-per-point <n>  每个知识点最多附加多少条外部证据
   --json <file>          额外写出机器可读的运行报告
   --probe                只做环境自检，不生成笔记
   --help                 显示本帮助
@@ -59,7 +67,8 @@ function parseArgs(argv) {
   const takesValue = new Set([
     '--out', '--work', '--language', '--detail', '--web-endpoint', '--order',
     '--python', '--max-searches', '--max-fetches', '--json', '--input',
-    '--brief-budget', '--chapter-level',
+    '--brief-budget', '--chapter-level', '--mode', '--stages', '--chunk-chars',
+    '--evidence-per-point',
   ]);
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
@@ -116,6 +125,7 @@ function configFromFlags(flags) {
   if (flags.work) raw.workDir = flags.work;
   if (flags.language) raw.language = flags.language;
   if (flags.detail) raw.detailLevel = flags.detail;
+  if (flags.mode) raw.mode = flags.mode;
   if (flags.web === false) raw.enableWebSearch = false;
   if (flags.ocr === false) raw.enableOcr = false;
   if (flags.exercises === false) raw.includeExercises = false;
@@ -128,7 +138,36 @@ function configFromFlags(flags) {
   if (flags['max-fetches']) raw.maxFetches = Number(flags['max-fetches']);
   if (flags['brief-budget']) raw.briefCharBudget = Number(flags['brief-budget']);
   if (flags['chapter-level']) raw.chapterHeadingLevel = Number(flags['chapter-level']);
+  if (flags['chunk-chars']) raw.chunkChars = Number(flags['chunk-chars']);
+  if (flags['evidence-per-point']) raw.evidencePerPoint = Number(flags['evidence-per-point']);
   return normalizeConfig(raw);
+}
+
+/** Parse `--stages a,b` into the canonical stage list the pipeline expects. */
+const STAGE_ALIASES = {
+  scan: 'scan', parse: 'parse', knowledge: 'knowledge', retrieve: 'retrieve',
+  retrieval: 'retrieve', web: 'retrieve', search: 'retrieve',
+  generate: 'generate', notes: 'generate', check: 'check', coverage: 'check',
+  output: 'output', write: 'output',
+};
+const STAGE_ORDER = ['scan', 'parse', 'knowledge', 'retrieve', 'generate', 'check', 'output'];
+
+function stagesFromFlags(value) {
+  if (value === undefined) return null;
+  const requested = String(value)
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter((item) => item !== '');
+  const resolved = [];
+  for (const item of requested) {
+    const stage = STAGE_ALIASES[item];
+    if (!stage) {
+      throw new Error(`unknown stage "${item}"; supported: ${Object.keys(STAGE_ALIASES).join(', ')}`);
+    }
+    if (!resolved.includes(stage)) resolved.push(stage);
+  }
+  if (resolved.length === 0) return null;
+  return STAGE_ORDER.filter((stage) => resolved.includes(stage));
 }
 
 /** Minimal HTTP search adapter for offline/CI runs. */
@@ -226,7 +265,27 @@ async function main() {
   }
 
   const cwd = process.cwd();
-  const config = configFromFlags(parsed.flags);
+  let config = configFromFlags(parsed.flags);
+  let requestedStages;
+  try {
+    requestedStages = stagesFromFlags(parsed.flags.stages);
+  } catch (error) {
+    process.stderr.write(`${error.message}\n\n${USAGE}`);
+    process.exit(2);
+  }
+  /*
+   * There is no `ctx.llm` in an offline run, so `auto` would only ever degrade to
+   * `scaffold` — with a reported reason, but after the user asked for something
+   * the CLI cannot do.  Saying so up front is better than a run that quietly
+   * produces a scaffold.
+   */
+  if (config.mode === 'auto') {
+    process.stderr.write(
+      '提示 / note: 离线 CLI 没有 ctx.llm，--mode auto 会降级为 scaffold（运行报告会写明原因）。\n' +
+        'To author with a model, run CourseNotes inside DeepSeek Harness, or use the writing brief produced here.\n',
+    );
+    config = { ...config, mode: 'scaffold' };
+  }
   const wantsVerbose = process.env.COURSE_NOTES_VERBOSE === '1';
   const logger = createLogger(
     wantsVerbose ? 'debug' : config.logLevel,
@@ -249,18 +308,29 @@ async function main() {
     workspace: createNodeWorkspace(),
     deps: { web },
     logger,
+    requestedStages,
   });
 
+  const quality = report.quality;
   const stdout = [
     `CourseNotes ${report.runId} — ${report.courseName}`,
+    `状态 / Completion: ${report.completion} — ${COMPLETION_STATES[report.completion] ?? ''}`,
+    report.completionReason ? `依据 / Reason: ${report.completionReason}` : '',
     `输出 / Output: ${toPosix(report.outputDir)}`,
     `解析 / Parsed: ${report.stages?.parse?.summary?.parsedCount ?? 0}/${report.documents.length}`,
     `章节 / Chapters: ${report.knowledge?.counts?.chapters ?? 0}　知识点 / Key points: ${report.knowledge?.counts?.keyPoints ?? 0}`,
     report.coverage
       ? `覆盖率 / Coverage: ${(report.coverage.ratio * 100).toFixed(1)}%（covered ${report.coverage.covered}, partial ${report.coverage.partial}, missing ${report.coverage.missing}）`
       : '覆盖率 / Coverage: （未执行）',
+    quality
+      ? `质量 / Quality: 全维度通过 ${quality.points.complete}/${quality.points.total}；双语 ${quality.points.bilingualOk}/${quality.points.total}；公式解释 ${quality.formulas.explained}/${quality.formulas.total}；引用异常 ${quality.citations.checkable ? quality.citations.unknown.length : 'n/a'}`
+      : '',
+    report.evidence
+      ? `证据映射 / Evidence: ${report.evidence.pointsWithEvidence}/${report.evidence.points} 个知识点有外部证据（可引用 URL ${report.evidence.allowlistedUrls} 个）`
+      : '',
+    report.vision?.stats?.total > 0 ? `视觉任务 / Vision: ${report.vision.stats.total} 个（待解读 ${report.vision.stats.total - (report.vision.applied?.count ?? 0)}）` : '',
     report.retrieval?.summary ?? '',
-    report.errors.length > 0 ? `错误 / Errors: ${report.errors.length}` : '',
+    report.errors.length > 0 ? `错误 / Errors: ${report.errors.length}（详见 run-report.md）` : '',
     `笔记文件 / Note files:`,
     ...(report.outputs?.noteFiles ?? []).map((file) => `  - ${toPosix(file)}`),
   ]
@@ -272,7 +342,9 @@ async function main() {
     fs.writeFileSync(parsed.flags.json, JSON.stringify({ ...report, brief: report.brief }, null, 1), 'utf8');
     process.stdout.write(`运行报告 / run report: ${toPosix(parsed.flags.json)}\n`);
   }
-  process.exit(report.errors.length === 0 ? 0 : 1);
+  // Exit status reflects *usable notes*, not merely "no exception": a run whose
+  // output could not be written is a failure even though the pipeline completed.
+  process.exit(report.completion === 'failed' || report.errors.length > 0 ? 1 : 0);
 }
 
 main().catch((error) => {
